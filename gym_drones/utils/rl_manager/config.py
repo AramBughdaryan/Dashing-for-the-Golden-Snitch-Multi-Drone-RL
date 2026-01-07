@@ -1,14 +1,24 @@
-"""This module contains functions to process the configuration for the train and evaluate scripts.
-"""
+"""This module contains functions to process the configuration for the train and evaluate scripts."""
 
-import argparse, os, yaml
+import argparse
+import os
+import yaml
 from typing import Union, Optional
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
-from gym_drones.utils.utils import recursive_dict_update, recursive_enum_mapping, fix_none_values, get_latest_run_id
+from gym_drones.utils.utils import (
+    recursive_dict_update,
+    recursive_enum_mapping,
+    fix_none_values,
+    get_latest_run_id,
+)
 
 
-def _get_config(config_name: str, current_dir: Union[str, os.PathLike], subfolder: Union[str, os.PathLike]) -> dict:
+def _get_config(
+    config_name: str,
+    current_dir: Union[str, os.PathLike],
+    subfolder: Union[str, os.PathLike],
+) -> dict:
     """Get the config dictionary from the YAML file.
 
     Parameters
@@ -26,7 +36,10 @@ def _get_config(config_name: str, current_dir: Union[str, os.PathLike], subfolde
         Dictionary containing the configuration parameters.
 
     """
-    with open(os.path.join(current_dir, "config", subfolder, "{}.yaml".format(config_name)), "r") as f:
+    with open(
+        os.path.join(current_dir, "config", subfolder, "{}.yaml".format(config_name)),
+        "r",
+    ) as f:
         try:
             config_dict = yaml.load(f, Loader=yaml.FullLoader)
         except yaml.YAMLError as exc:
@@ -35,7 +48,11 @@ def _get_config(config_name: str, current_dir: Union[str, os.PathLike], subfolde
 
 
 def _read_all_config(
-    args: argparse.Namespace, current_dir: Union[str, os.PathLike], envconfig: dict, algconfig: dict, runconfig: dict
+    args: argparse.Namespace,
+    current_dir: Union[str, os.PathLike],
+    envconfig: dict,
+    algconfig: dict,
+    runconfig: dict,
 ) -> dict:
     """Read the default config file.
 
@@ -65,7 +82,9 @@ def _read_all_config(
                 config_dict = yaml.safe_load(f)
             except yaml.YAMLError as exc:
                 assert False, "{} error: {}".format(args.config, exc)
-        config_dict["logging"]["drone_model_path"] = os.path.join(current_dir, os.path.dirname(args.config))
+        config_dict["logging"]["drone_model_path"] = os.path.join(
+            current_dir, os.path.dirname(args.config)
+        )
     else:
         # Get the defaults from train_default.yaml
         with open(os.path.join(current_dir, "config", "train_default.yaml"), "r") as f:
@@ -127,7 +146,9 @@ def _read_all_config(
     reset_num_timesteps = getattr(args, "no_reset_t", None)
     if reset_num_timesteps is not None:
         config_dict["logging"]["reset_num_timesteps"] = (
-            reset_num_timesteps if not reset_num_timesteps else config_dict["logging"]["reset_num_timesteps"]
+            reset_num_timesteps
+            if not reset_num_timesteps
+            else config_dict["logging"]["reset_num_timesteps"]
         )
 
     eval_overwrite = getattr(args, "no_ow", None)
@@ -184,7 +205,9 @@ def _read_all_config(
     if obstacle_reward_weight is not None:
         if "env_kwargs" not in config_dict["env"]:
             config_dict["env"]["env_kwargs"] = {}
-        config_dict["env"]["env_kwargs"]["obstacle_reward_weight"] = obstacle_reward_weight
+        config_dict["env"]["env_kwargs"]["obstacle_reward_weight"] = (
+            obstacle_reward_weight
+        )
 
     # Set default experiment name if not provided
     if config_dict["pyrl"]["exp_name"] is None:
@@ -220,7 +243,9 @@ def _save_config(
         model_id = config_dict["logging"]["run_id"]
         if eval_mode:
             if eval_save_dir is None:
-                raise ValueError("eval_save_dir must be provided when eval_mode is True.")
+                raise ValueError(
+                    "eval_save_dir must be provided when eval_mode is True."
+                )
             config_save_path = os.path.join(
                 eval_save_dir,
                 "configs",
@@ -267,9 +292,15 @@ def process_run_id(config_dict: dict, current_dir: Union[str, os.PathLike]) -> N
 
     latest_run_id = get_latest_run_id(log_save_path, log_save_name)
     # If run_id is set, protect files from being overwritten
-    if config_dict["logging"].get("run_id") is None or config_dict["logging"]["reset_num_timesteps"]:
+    if (
+        config_dict["logging"].get("run_id") is None
+        or config_dict["logging"]["reset_num_timesteps"]
+    ):
         # Adjust run_id if reset_num_timesteps is False
-        if config_dict["logging"].get("run_id") is None and not config_dict["logging"]["reset_num_timesteps"]:
+        if (
+            config_dict["logging"].get("run_id") is None
+            and not config_dict["logging"]["reset_num_timesteps"]
+        ):
             latest_run_id -= 1
         config_dict["logging"]["run_id"] = latest_run_id
 
@@ -290,9 +321,13 @@ def process_eval_config(config_dict: dict) -> None:
     config_dict["logging"]["reset_num_timesteps"] = False
     file_ext = os.path.splitext(config_dict["logging"]["load_model_path"])[1].lower()
     if file_ext == ".pt":
-        file_name = os.path.splitext(os.path.basename(config_dict["logging"]["load_model_path"]))[0]
+        file_name = os.path.splitext(
+            os.path.basename(config_dict["logging"]["load_model_path"])
+        )[0]
         config_dict["logging"]["save_model_name"] = (
-            file_name + "_pt" if config_dict["logging"]["save_model_name"] == file_name else file_name
+            file_name + "_pt"
+            if config_dict["logging"]["save_model_name"] == file_name
+            else file_name
         )
     # process env config
     config_dict["env"]["env_kwargs"]["eval_mode"] = True
@@ -335,8 +370,12 @@ def process_config(
     """
     # read the config file
     envconfig = _get_config(envkey[args.env], current_dir, "envs")  # read env config
-    algconfig = _get_config(algkey[args.env], current_dir, f"algs/{envkey[args.env]}")  # read rl hyperparameters
-    runconfig = _get_config(runkey[args.env], current_dir, "runners")  # read runner config
+    algconfig = _get_config(
+        algkey[args.env], current_dir, f"algs/{envkey[args.env]}"
+    )  # read rl hyperparameters
+    runconfig = _get_config(
+        runkey[args.env], current_dir, "runners"
+    )  # read runner config
 
     # update the config_dict with envconfig, algconfig, and runconfig
     config_dict = _read_all_config(args, current_dir, envconfig, algconfig, runconfig)
@@ -385,7 +424,9 @@ def process_vis_config(
         Dictionary containing the configuration parameters.
 
     """
-    with open(os.path.join(current_dir, "config", "vis", f"{file_name}.yaml"), "r") as f:
+    with open(
+        os.path.join(current_dir, "config", "vis", f"{file_name}.yaml"), "r"
+    ) as f:
         try:
             config_dict = yaml.safe_load(f)
         except yaml.YAMLError as exc:
@@ -400,7 +441,10 @@ def process_vis_config(
     if margin is not None:
         config_dict["shape_kwargs"]["margin"] = margin
 
-    config_dict["track_kwargs"] = {**config_dict["shape_kwargs"], **config_dict["gate_kwargs"]}
+    config_dict["track_kwargs"] = {
+        **config_dict["shape_kwargs"],
+        **config_dict["gate_kwargs"],
+    }
 
     _recursive_process_cmap(config_dict)
 

@@ -1,4 +1,5 @@
-import os, yaml
+import os
+import yaml
 import numpy as np
 import torch as th
 import gymnasium as gym
@@ -50,15 +51,24 @@ def _get_predict_fn(
         output_activation_fn = config_dict["agent"].get("output_activation_fn", None)
         if output_activation_fn is not None:
             output_activation_fn = output_activation_fn()
-            predict_fn = lambda obs: output_activation_fn(model(th.from_numpy(obs).to(device))).detach().cpu().numpy()
+            predict_fn = (
+                lambda obs: output_activation_fn(model(th.from_numpy(obs).to(device)))
+                .detach()
+                .cpu()
+                .numpy()
+            )
         else:
-            predict_fn = lambda obs: np.clip(model(th.from_numpy(obs).to(device)).detach().cpu().numpy(), -1, 1)
+            predict_fn = lambda obs: np.clip(
+                model(th.from_numpy(obs).to(device)).detach().cpu().numpy(), -1, 1
+            )
     else:
         raise TypeError("Unsupported model type. Expected PPO or th.nn.Module.")
     return predict_fn
 
 
-def _get_save_path(config_dict: dict, current_dir: Union[str, os.PathLike]) -> os.PathLike:
+def _get_save_path(
+    config_dict: dict, current_dir: Union[str, os.PathLike]
+) -> os.PathLike:
     """Get the save path for the evaluation results.
 
     Parameters
@@ -77,7 +87,9 @@ def _get_save_path(config_dict: dict, current_dir: Union[str, os.PathLike]) -> o
     # get the save path
     model_name = config_dict["logging"]["save_model_name"]
     model_id = config_dict["logging"]["run_id"]
-    eval_save_dirname = config_dict["logging"].get("save_eval_path", config_dict["logging"]["save_config_dirname"])
+    eval_save_dirname = config_dict["logging"].get(
+        "save_eval_path", config_dict["logging"]["save_config_dirname"]
+    )
     eval_save_path = os.path.join(
         current_dir,
         eval_save_dirname,
@@ -100,7 +112,9 @@ def _get_save_path(config_dict: dict, current_dir: Union[str, os.PathLike]) -> o
         print("-" * 50)
         print("[EVALUATION DETAILS]")
         print(f"Evaluation name: {eval_name}_{eval_id + 1}")
-        print(f"Evaluating {model_name}_{model_id + 1} on {config_dict['env']['env_id']}")
+        print(
+            f"Evaluating {model_name}_{model_id + 1} on {config_dict['env']['env_id']}"
+        )
     return output_folder
 
 
@@ -219,7 +233,11 @@ def _output_track_info(
                 print("\n" + "=" * 50)
                 print(f"{header:^50}")
                 print("=" * 50)
-                print("{:<5} {:<15} {:<15} {:<15}".format("Pt#", "X-coord(m)", "Y-coord(m)", "Z-coord(m)"))
+                print(
+                    "{:<5} {:<15} {:<15} {:<15}".format(
+                        "Pt#", "X-coord(m)", "Y-coord(m)", "Z-coord(m)"
+                    )
+                )
                 print("-" * 50)
 
                 for i, point in enumerate(waypoints):
@@ -251,11 +269,15 @@ def _output_track_info(
                         loop_wp_id += 1
 
                     print(
-                        "{:<5} {:<15.4f} {:<15.4f} {:<15.2f} {}".format(i + 1, point[0], point[1], point[2], point_name)
+                        "{:<5} {:<15.4f} {:<15.4f} {:<15.2f} {}".format(
+                            i + 1, point[0], point[1], point[2], point_name
+                        )
                     )
 
                 print("=" * 50)
-                print(f"Total: {len(waypoints)} points, Path length: {_calculate_path_length(waypoints):.2f}m")
+                print(
+                    f"Total: {len(waypoints)} points, Path length: {_calculate_path_length(waypoints):.2f}m"
+                )
                 if same_track and track_num_drones > 1:
                     for mth_drone in range(track_num_drones):
                         # print the start and end points for all drones
@@ -263,14 +285,21 @@ def _output_track_info(
                         print("\n" + "=" * 50)
                         print(f"{header:^50}")
                         print("=" * 50)
-                        print("{:<10} {:<12} {:<12} {:<12}".format("Type", "X-coord(m)", "Y-coord(m)", "Z-coord(m)"))
+                        print(
+                            "{:<10} {:<12} {:<12} {:<12}".format(
+                                "Type", "X-coord(m)", "Y-coord(m)", "Z-coord(m)"
+                            )
+                        )
                         print("-" * 50)
 
                         # print the start points
                         for j, start_point in enumerate(start_points[mth_drone]):
                             print(
                                 "{:<10} {:<12.4f} {:<12.4f} {:<12.2f}".format(
-                                    f"Start {j+1}", start_point[0], start_point[1], start_point[2]
+                                    f"Start {j + 1}",
+                                    start_point[0],
+                                    start_point[1],
+                                    start_point[2],
                                 )
                             )
 
@@ -278,14 +307,20 @@ def _output_track_info(
                         for j, end_point in enumerate(end_points[mth_drone]):
                             print(
                                 "{:<10} {:<12.4f} {:<12.4f} {:<12.2f}".format(
-                                    f"End   {j+1}", end_point[0], end_point[1], end_point[2]
+                                    f"End   {j + 1}",
+                                    end_point[0],
+                                    end_point[1],
+                                    end_point[2],
                                 )
                             )
                     break  # only print once for same track
 
 
 def _read_track(
-    current_dir: Union[str, os.PathLike], env: gym.Env, track_name: str, verbose: int = 0
+    current_dir: Union[str, os.PathLike],
+    env: gym.Env,
+    track_name: str,
+    verbose: int = 0,
 ) -> Tuple[np.ndarray, str, dict]:
     """Read the track information.
 
@@ -362,12 +397,19 @@ def _read_track(
     moving_gate = data.get("moving_gate", None)
     if moving_gate is not None:
         gate_planner = GateMotionPlanner(
-            num_waypoints_per_lap=num_waypoints_per_lap, num_laps=repeat_lap, moving_gate_config=moving_gate
+            num_waypoints_per_lap=num_waypoints_per_lap,
+            num_laps=repeat_lap,
+            moving_gate_config=moving_gate,
         )
     else:
         gate_planner = None
         # print(gate_planner.motion_plan)
-    return WPs.reshape(-1, 3) if track_num_drones == 1 else WPs, comment, data, gate_planner
+    return (
+        WPs.reshape(-1, 3) if track_num_drones == 1 else WPs,
+        comment,
+        data,
+        gate_planner,
+    )
 
 
 def _add_track_noise(
@@ -453,11 +495,22 @@ def _eval_sim_loop(
     gate_planner = None
     if track_name is not None:
         waypoints_track, comment, track_raw_data, gate_planner = _read_track(
-            current_dir=current_dir, env=env, track_name=track_name, verbose=config_dict["rl_hyperparams"]["verbose"]
+            current_dir=current_dir,
+            env=env,
+            track_name=track_name,
+            verbose=config_dict["rl_hyperparams"]["verbose"],
         )
         run_track = True
-        start_len = np.array(track_raw_data["start_points"]).reshape((env.NUM_DRONES, -1, 3)).shape[1]
-        end_len = np.array(track_raw_data["end_points"]).reshape((env.NUM_DRONES, -1, 3)).shape[1]
+        start_len = (
+            np.array(track_raw_data["start_points"])
+            .reshape((env.NUM_DRONES, -1, 3))
+            .shape[1]
+        )
+        end_len = (
+            np.array(track_raw_data["end_points"])
+            .reshape((env.NUM_DRONES, -1, 3))
+            .shape[1]
+        )
     else:
         run_track = False
 
@@ -465,7 +518,9 @@ def _eval_sim_loop(
     rew_callback = EvalRewardCallback(verbose=config_dict["rl_hyperparams"]["verbose"])
     callback = [rew_callback]
     if track_name is not None:
-        time_callback = EvalTimeCallback(verbose=config_dict["rl_hyperparams"]["verbose"], data=track_raw_data)
+        time_callback = EvalTimeCallback(
+            verbose=config_dict["rl_hyperparams"]["verbose"], data=track_raw_data
+        )
         callback.append(time_callback)
     callback = _init_callback(env, callback)
 
@@ -547,8 +602,13 @@ def _eval_sim_loop(
             # check if the gate planner is used
             if gate_planner is not None:
                 dynamic_waypoints = waypoints.copy()
-                dynamic_waypoints[:, start_len:-end_len, :] = gate_planner.compute_positions(
-                    t=step_counter / env.CTRL_FREQ, initial_positions=dynamic_waypoints[:, start_len:-end_len, :].copy()
+                dynamic_waypoints[:, start_len:-end_len, :] = (
+                    gate_planner.compute_positions(
+                        t=step_counter / env.CTRL_FREQ,
+                        initial_positions=dynamic_waypoints[
+                            :, start_len:-end_len, :
+                        ].copy(),
+                    )
                 )
                 gate_t_list.append(step_counter / env.CTRL_FREQ)
                 gate_waypoints_list.append(dynamic_waypoints.copy())
@@ -578,7 +638,9 @@ def _eval_sim_loop(
         if config_dict["rl_hyperparams"]["verbose"] > 0:
             print("    " + "=" * 42)
             print(f"    [Episode {j + 1}] {episode_status}")
-            print(f"    Total timesteps:       {step_counter} ({step_counter / env.CTRL_FREQ}s)")
+            print(
+                f"    Total timesteps:       {step_counter} ({step_counter / env.CTRL_FREQ}s)"
+            )
         callback.on_episode_end()
 
     if config_dict["rl_hyperparams"]["verbose"] > 0:
@@ -592,7 +654,9 @@ def _eval_sim_loop(
         max_num_waypoint = min(np.max(env.num_waypoints) + 2, len(env.waypoints))
         max_num_waypoint = 2 if max_num_waypoint < 1 else max_num_waypoint
         output_waypoints = np.tile(env.waypoints, (env.NUM_DRONES, 1, 1))
-        pass_wps = output_waypoints.reshape((env.NUM_DRONES, -1, 3))[:, 0:max_num_waypoint]
+        pass_wps = output_waypoints.reshape((env.NUM_DRONES, -1, 3))[
+            :, 0:max_num_waypoint
+        ]
         track_raw_data = {
             "comment": "Random_waypoints",
             "num_drones": env.NUM_DRONES,
@@ -605,8 +669,16 @@ def _eval_sim_loop(
         noise_matrix = np.zeros((env.NUM_DRONES, pass_wps.shape[1] - 1, 3))
 
     # update the logger with the final information
-    crashed_step = env.crashed_step.copy() if hasattr(env, "crashed_step") else np.zeros(env.NUM_DRONES, dtype=int)
-    finished_step = env.finished_step.copy() if hasattr(env, "finished_step") else np.zeros(env.NUM_DRONES, dtype=int)
+    crashed_step = (
+        env.crashed_step.copy()
+        if hasattr(env, "crashed_step")
+        else np.zeros(env.NUM_DRONES, dtype=int)
+    )
+    finished_step = (
+        env.finished_step.copy()
+        if hasattr(env, "finished_step")
+        else np.zeros(env.NUM_DRONES, dtype=int)
+    )
     update_info = {
         "crashed_step": crashed_step,
         "finished_step": finished_step,
@@ -690,7 +762,14 @@ def eval_model(
     predict_fn = _get_predict_fn(model, config_dict)
 
     # get the logger
-    logger, callback, results_comment, track_raw_data, noise_matrix, moving_gate_data = _eval_sim_loop(
+    (
+        logger,
+        callback,
+        results_comment,
+        track_raw_data,
+        noise_matrix,
+        moving_gate_data,
+    ) = _eval_sim_loop(
         predict_fn=predict_fn,
         env=env,
         config_dict=config_dict,
@@ -720,11 +799,14 @@ def eval_model(
         )
         # save the environment parameters
         env.saveYAMLParameters(
-            save_path=os.path.join(save_dir, "configs"), verbose=config_dict["rl_hyperparams"]["verbose"]
+            save_path=os.path.join(save_dir, "configs"),
+            verbose=config_dict["rl_hyperparams"]["verbose"],
         )
         # save the track data if available
         if track_raw_data is not None:
-            save_track_path = os.path.join(save_dir, "configs/Tracks", f"{comment}.yaml")
+            save_track_path = os.path.join(
+                save_dir, "configs/Tracks", f"{comment}.yaml"
+            )
             os.makedirs(os.path.dirname(save_track_path), exist_ok=True)
             if config_dict["rl_hyperparams"]["verbose"] > 0:
                 print(f"Saving track data to {save_track_path}")
@@ -734,7 +816,11 @@ def eval_model(
     # Extract obstacle data if available
     obstacles = None
     obstacle_size = 0.5
-    if hasattr(env, "obstacles") and hasattr(env, "NUM_OBSTACLES") and env.NUM_OBSTACLES > 0:
+    if (
+        hasattr(env, "obstacles")
+        and hasattr(env, "NUM_OBSTACLES")
+        and env.NUM_OBSTACLES > 0
+    ):
         obstacles = env.obstacles.copy()
         obstacle_size = env.OBSTACLE_SIZE
         if config_dict["rl_hyperparams"]["verbose"] > 0:
@@ -743,4 +829,13 @@ def eval_model(
     # close the environment
     env.close()
 
-    return logger, track_raw_data, moving_gate_data, noise_matrix, save_dir, comment, obstacles, obstacle_size
+    return (
+        logger,
+        track_raw_data,
+        moving_gate_data,
+        noise_matrix,
+        save_dir,
+        comment,
+        obstacles,
+        obstacle_size,
+    )

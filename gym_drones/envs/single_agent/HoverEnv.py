@@ -9,7 +9,6 @@ from gym_drones.envs.single_agent.SingleDroneAgentBase import (
     SingleDroneAgentBase,
 )
 
-from scipy.spatial.transform import Rotation
 from typing import Optional, Tuple, Union
 
 
@@ -106,14 +105,22 @@ class HoverEnv(SingleDroneAgentBase):
             return -5  # crash
         else:
             weights = np.array([1, 1, 3])  # ensure z is more important
-            last_prog_rew = np.sqrt(np.sum(np.square((target - last_state[0:3]) * weights)))
-            current_prog_rew = np.sqrt(np.sum(np.square((target - state[0:3]) * weights)))
+            last_prog_rew = np.sqrt(
+                np.sum(np.square((target - last_state[0:3]) * weights))
+            )
+            current_prog_rew = np.sqrt(
+                np.sum(np.square((target - state[0:3]) * weights))
+            )
 
             prog_reward = last_prog_rew - current_prog_rew
 
             command_reward = (
                 -2e-4 * np.linalg.norm(rate)
-                - 1e-4 * np.linalg.norm(self.clipped_action[0, :] - self.last_clipped_action[0, :]) ** 2
+                - 1e-4
+                * np.linalg.norm(
+                    self.clipped_action[0, :] - self.last_clipped_action[0, :]
+                )
+                ** 2
             )
             total_reward = prog_reward + command_reward
             self.prog_reward = prog_reward
@@ -221,7 +228,9 @@ class HoverEnv(SingleDroneAgentBase):
         normalized_vel_xy = clipped_vel_xy / MAX_LIN_VEL_XY
         normalized_vel_z = clipped_vel_z / MAX_LIN_VEL_Z
         normalized_ang_vel = (
-            state[13:16] / np.linalg.norm(state[13:16]) if np.linalg.norm(state[13:16]) != 0 else state[13:16]
+            state[13:16] / np.linalg.norm(state[13:16])
+            if np.linalg.norm(state[13:16]) != 0
+            else state[13:16]
         )
         normalized_distance = clipped_distance / (MAX_XY * 3)
         normalized_direction = rel_pos / distance if distance != 0 else rel_pos
@@ -264,7 +273,9 @@ class HoverEnv(SingleDroneAgentBase):
             self.num_waypoints[0] = self.num_waypoints[0] + 1
             self.TARGET[0] = self.next_TARGET[0]
             if not self.run_track:
-                self.next_TARGET[0] = self.waypoints[(self.num_waypoints[0] + 1) % len(self.waypoints)]
+                self.next_TARGET[0] = self.waypoints[
+                    (self.num_waypoints[0] + 1) % len(self.waypoints)
+                ]
             else:
                 if self.num_waypoints[0] + 1 >= len(self.waypoints):
                     self.next_TARGET[0] = self.waypoints[-1]
@@ -279,7 +290,9 @@ class HoverEnv(SingleDroneAgentBase):
         """Random initialization of the environment."""
         self.num_waypoints = np.zeros(self.NUM_DRONES, dtype=int)
         # set initial position
-        self.INIT_XYZS[:, :] = np.array([(np.hstack([0, 0, self.INIT_HEIGHT])) for i in range(self.NUM_DRONES)])
+        self.INIT_XYZS[:, :] = np.array(
+            [(np.hstack([0, 0, self.INIT_HEIGHT])) for i in range(self.NUM_DRONES)]
+        )
         # generate random waypoints
         waypoints = []
         if self.DIM == SimulationDim.DIM_2 or self.DIM == SimulationDim.DIM_3:
@@ -288,7 +301,11 @@ class HoverEnv(SingleDroneAgentBase):
                     temp_waypoint = np.hstack(
                         [
                             0.0,
-                            self.np_random.uniform(low=-self.MAX_POS_XY / 2, high=self.MAX_POS_XY / 2, size=(1,)),
+                            self.np_random.uniform(
+                                low=-self.MAX_POS_XY / 2,
+                                high=self.MAX_POS_XY / 2,
+                                size=(1,),
+                            ),
                             self.np_random.uniform(
                                 low=self.INIT_HEIGHT - self.MAX_POS_Z / 2,
                                 high=self.INIT_HEIGHT + self.MAX_POS_Z / 2,
@@ -299,7 +316,11 @@ class HoverEnv(SingleDroneAgentBase):
                 elif self.DIM == SimulationDim.DIM_3:
                     temp_waypoint = np.hstack(
                         [
-                            self.np_random.uniform(low=-self.MAX_POS_XY / 2, high=self.MAX_POS_XY / 2, size=(2,)),
+                            self.np_random.uniform(
+                                low=-self.MAX_POS_XY / 2,
+                                high=self.MAX_POS_XY / 2,
+                                size=(2,),
+                            ),
                             self.np_random.uniform(
                                 low=self.INIT_HEIGHT - self.MAX_POS_Z / 2,
                                 high=self.INIT_HEIGHT + self.MAX_POS_Z / 2,

@@ -11,7 +11,9 @@ class RewardCheckCallback(BaseCallback):
         super(RewardCheckCallback, self).__init__(verbose)
         # for cal dones, get episode
         if num_env is None:
-            raise ValueError("num_env cannot be None. Please specify the number of environments.")
+            raise ValueError(
+                "num_env cannot be None. Please specify the number of environments."
+            )
 
         # init
         self.num_nev = num_env
@@ -28,9 +30,9 @@ class RewardCheckCallback(BaseCallback):
         self.episode_success_rate = 0
 
     def _on_step(self) -> bool:
-        assert (
-            "dones" in self.locals
-        ), "`dones` variable is not defined, please check your code next to `callback.on_step()`"
+        assert "dones" in self.locals, (
+            "`dones` variable is not defined, please check your code next to `callback.on_step()`"
+        )
         self.check_finish_rate = "finish_rate" in self.locals["infos"][0]
         self.check_success_rate = "success_rate" in self.locals["infos"][0]
         # add prog rewards
@@ -39,13 +41,23 @@ class RewardCheckCallback(BaseCallback):
             self.episode_prog_rewards[i] += self.locals["infos"][i]["prog_reward"]
             self.episode_command_rewards[i] += self.locals["infos"][i]["command_reward"]
             self.episode_crash_rewards[i] += self.locals["infos"][i]["crash_reward"]
-            self.episode_drone_safe_rewards[i] += self.locals["infos"][i]["drone_safe_reward"]
+            self.episode_drone_safe_rewards[i] += self.locals["infos"][i][
+                "drone_safe_reward"
+            ]
 
         # add reward per step for each env
-        self.episode_prog_done_rewards += np.sum(self.episode_prog_rewards[self.locals["dones"]])
-        self.episode_command_done_rewards += np.sum(self.episode_command_rewards[self.locals["dones"]])
-        self.episode_crash_done_rewards += np.sum(self.episode_crash_rewards[self.locals["dones"]])
-        self.episode_drone_safe_done_rewards += np.sum(self.episode_drone_safe_rewards[self.locals["dones"]])
+        self.episode_prog_done_rewards += np.sum(
+            self.episode_prog_rewards[self.locals["dones"]]
+        )
+        self.episode_command_done_rewards += np.sum(
+            self.episode_command_rewards[self.locals["dones"]]
+        )
+        self.episode_crash_done_rewards += np.sum(
+            self.episode_crash_rewards[self.locals["dones"]]
+        )
+        self.episode_drone_safe_done_rewards += np.sum(
+            self.episode_drone_safe_rewards[self.locals["dones"]]
+        )
         if self.check_finish_rate:
             for i, done in enumerate(self.locals["dones"]):
                 if done:

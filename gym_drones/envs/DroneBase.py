@@ -64,7 +64,10 @@ class DroneBase(gym.Env):
         self.SIM_FREQ = sim_freq
 
         if self.SIM_FREQ % self.CTRL_FREQ != 0:
-            raise ValueError("[ERROR] in DroneBase.__init__(), " "sim_freq is not divisible by ctrl_freq.")
+            raise ValueError(
+                "[ERROR] in DroneBase.__init__(), "
+                "sim_freq is not divisible by ctrl_freq."
+            )
 
         self.SIM_STEPS_PER_CTRL = int(self.SIM_FREQ / self.CTRL_FREQ)
         self.CTRL_TIMESTEP = 1.0 / self.CTRL_FREQ
@@ -132,7 +135,10 @@ class DroneBase(gym.Env):
         elif np.array(initial_xyzs).shape == (self.NUM_DRONES, 3):
             self.INIT_XYZS = initial_xyzs
         else:
-            print("[ERROR] invalid initial_xyzs in DroneBase.__init__(), " "try initial_xyzs.reshape(NUM_DRONES,3)")
+            print(
+                "[ERROR] invalid initial_xyzs in DroneBase.__init__(), "
+                "try initial_xyzs.reshape(NUM_DRONES,3)"
+            )
 
         # Attitudes
         if initial_rpys is None:
@@ -140,7 +146,10 @@ class DroneBase(gym.Env):
         elif np.array(initial_rpys).shape == (self.NUM_DRONES, 3):
             self.INIT_RPYS = initial_rpys
         else:
-            print("[ERROR] invalid initial_rpys in DroneBase.__init__(), " "try initial_rpys.reshape(NUM_DRONES,3)")
+            print(
+                "[ERROR] invalid initial_rpys in DroneBase.__init__(), "
+                "try initial_rpys.reshape(NUM_DRONES,3)"
+            )
 
         # Velocities
         self.INIT_VELS = np.zeros((self.NUM_DRONES, 3))
@@ -220,7 +229,9 @@ class DroneBase(gym.Env):
 
         """
         #### Initialize/reset counters and zero-valued variables ###
-        self.last_action = np.hstack((np.ones((self.NUM_DRONES, 1)), np.zeros((self.NUM_DRONES, 3))))
+        self.last_action = np.hstack(
+            (np.ones((self.NUM_DRONES, 1)), np.zeros((self.NUM_DRONES, 3)))
+        )
         self.last_states = np.zeros((self.NUM_DRONES, 10))
         self.clipped_action = self.last_action.copy() * self.GRAVITY
         self.last_clipped_action = self.clipped_action.copy()
@@ -228,8 +239,15 @@ class DroneBase(gym.Env):
         self.last_states[:, 0:3] = self.INIT_XYZS
         self.pos = self.INIT_XYZS
         self.rpy = self.INIT_RPYS
-        self.quat = np.array([Rotation.from_euler("xyz", rpy, degrees=False).as_quat() for rpy in self.INIT_RPYS])
-        self.rot = np.array([Rotation.from_quat(quat).as_matrix() for quat in self.quat])
+        self.quat = np.array(
+            [
+                Rotation.from_euler("xyz", rpy, degrees=False).as_quat()
+                for rpy in self.INIT_RPYS
+            ]
+        )
+        self.rot = np.array(
+            [Rotation.from_quat(quat).as_matrix() for quat in self.quat]
+        )
         self.vel = self.INIT_VELS
         self.rate = np.zeros((self.NUM_DRONES, 3))
         self.thrust = np.full(self.NUM_DRONES, self.GRAVITY)
@@ -388,9 +406,13 @@ class DroneBase(gym.Env):
         if np.isclose(omega_norm, 0):
             return quat
 
-        lambda_ = np.array([[0, r, -q, p], [-r, 0, p, q], [q, -p, 0, r], [-p, -q, -r, 0]])
+        lambda_ = np.array(
+            [[0, r, -q, p], [-r, 0, p, q], [q, -p, 0, r], [-p, -q, -r, 0]]
+        )
         theta = omega_norm * dt / 2
-        quat = np.dot(np.eye(4) * np.cos(theta) + 1 / omega_norm * np.sin(theta) * lambda_, quat)
+        quat = np.dot(
+            np.eye(4) * np.cos(theta) + 1 / omega_norm * np.sin(theta) * lambda_, quat
+        )
         return quat
 
     ################################################################################
@@ -476,10 +498,14 @@ class DroneBase(gym.Env):
 
             # compute the rotation matrices
             rotation_matrices = identity_batch * nz_cos_thetas[:, None, None]
-            rotation_matrices += np.einsum("ijk,i->ijk", lambdas, nz_sin_thetas / nz_omega_norms)
+            rotation_matrices += np.einsum(
+                "ijk,i->ijk", lambdas, nz_sin_thetas / nz_omega_norms
+            )
 
             # apply the rotation matrices to the quaternions
-            result_quats[non_zero_mask] = np.einsum("ijk,ik->ij", rotation_matrices, nz_quats)
+            result_quats[non_zero_mask] = np.einsum(
+                "ijk,ik->ij", rotation_matrices, nz_quats
+            )
 
         return result_quats
 
@@ -500,7 +526,9 @@ class DroneBase(gym.Env):
 
         """
         if self.DIM == SimulationDim.DIM_2:
-            self.last_action = np.hstack((action.reshape(self.NUM_DRONES, 2), np.zeros((self.NUM_DRONES, 2))))
+            self.last_action = np.hstack(
+                (action.reshape(self.NUM_DRONES, 2), np.zeros((self.NUM_DRONES, 2)))
+            )
         elif self.DIM == SimulationDim.DIM_3:
             self.last_action = np.reshape(action, (self.NUM_DRONES, 4))
 
@@ -508,11 +536,15 @@ class DroneBase(gym.Env):
 
     def _saveLastStates(self) -> None:
         """Stores the most recent states into attribute `self.last_states`."""
-        self.last_states = np.reshape(np.hstack([self.pos, self.quat, self.vel]), (self.NUM_DRONES, 10))
+        self.last_states = np.reshape(
+            np.hstack([self.pos, self.quat, self.vel]), (self.NUM_DRONES, 10)
+        )
 
     ################################################################################
 
-    def _readYAMLParameters(self, file_path: Optional[Union[str, os.PathLike]] = None) -> tuple:
+    def _readYAMLParameters(
+        self, file_path: Optional[Union[str, os.PathLike]] = None
+    ) -> tuple:
         """Read drone parameters from a YAML file.
 
         This method reads various parameters related to the drone from a specified YAML file.
@@ -551,12 +583,18 @@ class DroneBase(gym.Env):
             - INIT_HEIGHT: float, initial height
         """
         if file_path is not None:
-            yaml_file_path = os.path.join(file_path, "assets", self.DRONE_MODEL.value, self.YAML)
+            yaml_file_path = os.path.join(
+                file_path, "assets", self.DRONE_MODEL.value, self.YAML
+            )
             if not os.path.exists(yaml_file_path):  # check if the file exists
                 print(f"Warning: {yaml_file_path} not found. Using default path.")
-                yaml_file_path = pkg_resources.files("gym_drones").joinpath("assets", self.DRONE_MODEL.value, self.YAML)
+                yaml_file_path = pkg_resources.files("gym_drones").joinpath(
+                    "assets", self.DRONE_MODEL.value, self.YAML
+                )
         else:
-            yaml_file_path = pkg_resources.files("gym_drones").joinpath("assets", self.DRONE_MODEL.value, self.YAML)
+            yaml_file_path = pkg_resources.files("gym_drones").joinpath(
+                "assets", self.DRONE_MODEL.value, self.YAML
+            )
         self.yaml_file_path = yaml_file_path
         with open(yaml_file_path, "r") as f:
             data = yaml.load(f.read(), Loader=yaml.FullLoader)
@@ -613,7 +651,9 @@ class DroneBase(gym.Env):
 
     ################################################################################
 
-    def saveYAMLParameters(self, save_path: Union[str, os.PathLike], verbose: int = 0) -> None:
+    def saveYAMLParameters(
+        self, save_path: Union[str, os.PathLike], verbose: int = 0
+    ) -> None:
         """Save the drone parameters to a YAML file.
 
         This method saves the current drone parameters to a specified YAML file.
@@ -628,7 +668,9 @@ class DroneBase(gym.Env):
         """
         with open(self.yaml_file_path, "r") as f:
             data = yaml.load(f.read(), Loader=yaml.FullLoader)
-        save_file_path = os.path.join(save_path, "assets", self.DRONE_MODEL.value, self.YAML)
+        save_file_path = os.path.join(
+            save_path, "assets", self.DRONE_MODEL.value, self.YAML
+        )
         os.makedirs(os.path.dirname(save_file_path), exist_ok=True)
         with open(save_file_path, "w") as f:
             yaml.dump(data, f, default_flow_style=False)
@@ -685,7 +727,9 @@ class DroneBase(gym.Env):
             scale_T = truncnorm(-1, 1, loc=1.0, scale=0.1).rvs()
             T = T * scale_T
             # DRAG_COEFF_L = DRAG_COEFF_L * np.random.uniform(0.5, 1.5, size=DRAG_COEFF_L.shape)
-            DRAG_COEFF_L = DRAG_COEFF_L * np.random.uniform(0.8, 1.2, size=DRAG_COEFF_L.shape)
+            DRAG_COEFF_L = DRAG_COEFF_L * np.random.uniform(
+                0.8, 1.2, size=DRAG_COEFF_L.shape
+            )
 
         #### state derivative ######################################
         d_position = vel
@@ -708,8 +752,12 @@ class DroneBase(gym.Env):
         self.vel[nth_drone, :] += d_velocity * self.SIM_TIMESTEP
         self.quat[nth_drone, :] = self._integrateQ(quat, rate, self.SIM_TIMESTEP)
         # use ZYX-order, but output order is rpy
-        self.rpy[nth_drone, :] = Rotation.from_quat(self.quat[nth_drone, :]).as_euler("xyz", degrees=False)
-        self.rot[nth_drone, :, :] = Rotation.from_quat(self.quat[nth_drone, :]).as_matrix()
+        self.rpy[nth_drone, :] = Rotation.from_quat(self.quat[nth_drone, :]).as_euler(
+            "xyz", degrees=False
+        )
+        self.rot[nth_drone, :, :] = Rotation.from_quat(
+            self.quat[nth_drone, :]
+        ).as_matrix()
         self.rate[nth_drone, :] += d_rate * self.SIM_TIMESTEP
         self.thrust[nth_drone] += d_T * self.SIM_TIMESTEP
 
@@ -735,7 +783,9 @@ class DroneBase(gym.Env):
             drone_indices = np.arange(self.NUM_DRONES)
         num_drones = len(drone_indices)
         if num_drones == 0:
-            Warning("[WARNING] in DroneBase._dynamics_vectorized(), " "no drones to update.")
+            Warning(
+                "[WARNING] in DroneBase._dynamics_vectorized(), no drones to update."
+            )
             return
         #### current state #########################################
         # select the drones to be updated
@@ -754,7 +804,9 @@ class DroneBase(gym.Env):
             scale_T = truncnorm(-1, 1, loc=1.0, scale=0.1).rvs(size=num_drones)
             T = T * scale_T
             # create a uniform distribution for scaling drag coefficients
-            random_factors = np.random.uniform(0.8, 1.2, size=(num_drones,) + DRAG_COEFF_L.shape)
+            random_factors = np.random.uniform(
+                0.8, 1.2, size=(num_drones,) + DRAG_COEFF_L.shape
+            )
             DRAG_COEFF_L = DRAG_COEFF_L * random_factors
 
         #### state derivative ######################################
@@ -798,7 +850,9 @@ class DroneBase(gym.Env):
         # update positions and velocities
         self.pos[drone_indices] += d_position * self.SIM_TIMESTEP
         self.vel[drone_indices] += d_velocity * self.SIM_TIMESTEP
-        self.quat[drone_indices] = self._integrateQ_vectorized(quat, rate, self.SIM_TIMESTEP)
+        self.quat[drone_indices] = self._integrateQ_vectorized(
+            quat, rate, self.SIM_TIMESTEP
+        )
         # update euler angles and rotation matrices
         rotations = Rotation.from_quat(quat)
         self.rpy[drone_indices] = rotations.as_euler("xyz", degrees=False)
@@ -835,7 +889,7 @@ class DroneBase(gym.Env):
 
     def _initRayDirections(self) -> None:
         """Initialize ray directions for obstacle detection.
-        
+
         Creates NUM_RAYS rays distributed in a horizontal circle around the drone.
         """
         if self.NUM_RAYS > 0:
@@ -855,14 +909,14 @@ class DroneBase(gym.Env):
 
     def _castRays(self, drone_pos: np.ndarray, drone_rot: np.ndarray) -> np.ndarray:
         """Cast rays from drone position and return distances to obstacles.
-        
+
         Parameters
         ----------
         drone_pos : ndarray[float]
             (3,)-shaped array containing the drone position [x, y, z].
         drone_rot : ndarray[float]
             (3, 3)-shaped array containing the rotation matrix.
-        
+
         Returns
         -------
         ndarray[float]
@@ -871,39 +925,39 @@ class DroneBase(gym.Env):
         """
         if self.NUM_OBSTACLES == 0 or self.NUM_RAYS == 0:
             return np.full(self.NUM_RAYS, self.RAY_LENGTH)
-        
+
         # Transform ray directions to world frame using drone rotation
         ray_dirs_world = (drone_rot @ self.ray_directions.T).T  # (NUM_RAYS, 3)
-        
+
         # Initialize distances to max ray length
         ray_distances = np.full(self.NUM_RAYS, self.RAY_LENGTH)
-        
+
         # For each ray, find the closest intersection with any obstacle
         for ray_idx in range(self.NUM_RAYS):
             ray_dir = ray_dirs_world[ray_idx]
             ray_start = drone_pos
-            
+
             # Check intersection with each obstacle (treated as spheres)
             for obs_idx in range(self.NUM_OBSTACLES):
                 obs_center = self.obstacles[obs_idx]
                 obs_radius = self.OBSTACLE_SIZE / 2.0
-                
+
                 # Vector from ray start to obstacle center
                 to_obs = obs_center - ray_start
-                
+
                 # Project to_obs onto ray direction
                 proj_length = np.dot(to_obs, ray_dir)
-                
+
                 # If projection is negative, obstacle is behind the ray start
                 if proj_length < 0:
                     continue
-                
+
                 # Closest point on ray to obstacle center
                 closest_point = ray_start + proj_length * ray_dir
-                
+
                 # Distance from closest point to obstacle center
                 dist_to_center = np.linalg.norm(closest_point - obs_center)
-                
+
                 # If distance is less than obstacle radius, ray intersects
                 if dist_to_center <= obs_radius:
                     # Calculate intersection distance
@@ -915,18 +969,21 @@ class DroneBase(gym.Env):
                         # Calculate distance along ray to intersection point
                         half_chord = np.sqrt(obs_radius**2 - dist_to_center**2)
                         intersection_dist = proj_length - half_chord
-                    
+
                     # Update if this is the closest intersection so far
-                    if intersection_dist >= 0 and intersection_dist < ray_distances[ray_idx]:
+                    if (
+                        intersection_dist >= 0
+                        and intersection_dist < ray_distances[ray_idx]
+                    ):
                         ray_distances[ray_idx] = intersection_dist
-        
+
         return ray_distances
 
     ################################################################################
 
     def _generateObstacles(self, min_dist_from_drones: float = 2.0) -> None:
         """Generate random obstacles in the environment.
-        
+
         Parameters
         ----------
         min_dist_from_drones : float, optional
@@ -934,23 +991,29 @@ class DroneBase(gym.Env):
         """
         if self.NUM_OBSTACLES == 0:
             return
-                
+
         obstacles = []
         max_attempts = 100 * self.NUM_OBSTACLES
-        
+
         for _ in range(self.NUM_OBSTACLES):
             attempt = 0
             while attempt < max_attempts:
                 # Generate random position within bounds
-                obs_pos = np.array([
-                    self.np_random.uniform(-self.MAX_POS_XY / 2, self.MAX_POS_XY / 2),
-                    self.np_random.uniform(-self.MAX_POS_XY / 2, self.MAX_POS_XY / 2),
-                    self.np_random.uniform(
-                        self.INIT_HEIGHT - self.MAX_POS_Z / 2,
-                        self.INIT_HEIGHT + self.MAX_POS_Z / 2
-                    )
-                ])
-                
+                obs_pos = np.array(
+                    [
+                        self.np_random.uniform(
+                            -self.MAX_POS_XY / 2, self.MAX_POS_XY / 2
+                        ),
+                        self.np_random.uniform(
+                            -self.MAX_POS_XY / 2, self.MAX_POS_XY / 2
+                        ),
+                        self.np_random.uniform(
+                            self.INIT_HEIGHT - self.MAX_POS_Z / 2,
+                            self.INIT_HEIGHT + self.MAX_POS_Z / 2,
+                        ),
+                    ]
+                )
+
                 # Check distance from all drones
                 too_close = False
                 for drone_pos in self.INIT_XYZS:
@@ -958,32 +1021,38 @@ class DroneBase(gym.Env):
                     if dist < min_dist_from_drones:
                         too_close = True
                         break
-                
+
                 # Check distance from other obstacles
                 for existing_obs in obstacles:
                     dist = np.linalg.norm(obs_pos - existing_obs)
                     if dist < self.OBSTACLE_SIZE:
                         too_close = True
                         break
-                
+
                 if not too_close:
                     obstacles.append(obs_pos)
                     break
-                
+
                 attempt += 1
-            
+
             # If we couldn't place it, place it anyway (might overlap)
             if attempt >= max_attempts:
-                obs_pos = np.array([
-                    self.np_random.uniform(-self.MAX_POS_XY / 2, self.MAX_POS_XY / 2),
-                    self.np_random.uniform(-self.MAX_POS_XY / 2, self.MAX_POS_XY / 2),
-                    self.np_random.uniform(
-                        self.INIT_HEIGHT - self.MAX_POS_Z / 2,
-                        self.INIT_HEIGHT + self.MAX_POS_Z / 2
-                    )
-                ])
+                obs_pos = np.array(
+                    [
+                        self.np_random.uniform(
+                            -self.MAX_POS_XY / 2, self.MAX_POS_XY / 2
+                        ),
+                        self.np_random.uniform(
+                            -self.MAX_POS_XY / 2, self.MAX_POS_XY / 2
+                        ),
+                        self.np_random.uniform(
+                            self.INIT_HEIGHT - self.MAX_POS_Z / 2,
+                            self.INIT_HEIGHT + self.MAX_POS_Z / 2,
+                        ),
+                    ]
+                )
                 obstacles.append(obs_pos)
-        
+
         self.obstacles = np.array(obstacles)
         # print(f"[OBSTACLE DEBUG] Generated {len(self.obstacles)} obstacles at positions:\n{self.obstacles}")
 
@@ -991,12 +1060,12 @@ class DroneBase(gym.Env):
 
     def _checkObstacleCollision(self, drone_pos: np.ndarray) -> bool:
         """Check if drone collides with any obstacle.
-        
+
         Parameters
         ----------
         drone_pos : ndarray[float]
             (3,)-shaped array containing the drone position.
-        
+
         Returns
         -------
         bool
@@ -1004,14 +1073,14 @@ class DroneBase(gym.Env):
         """
         if self.NUM_OBSTACLES == 0:
             return False
-        
+
         collision_radius = self.COLLISION_R + self.OBSTACLE_SIZE / 2.0
-        
+
         for obs_pos in self.obstacles:
             dist = np.linalg.norm(drone_pos - obs_pos)
             if dist < collision_radius:
                 return True
-        
+
         return False
 
     ################################################################################

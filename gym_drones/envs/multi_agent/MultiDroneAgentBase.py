@@ -83,10 +83,14 @@ class MultiDroneAgentBase(DroneBase):
 
         """
         if num_drones < 2:
-            print("[ERROR] in MultiDroneAgentBase.__init__(), num_drones should be >= 2")
+            print(
+                "[ERROR] in MultiDroneAgentBase.__init__(), num_drones should be >= 2"
+            )
             exit()
         if obs != ObservationType.RACE and obs != ObservationType.RACE_MULTI:
-            print("[ERROR] in MultiDroneAgentBase.__init__(): Wrong self.ObservationType!")
+            print(
+                "[ERROR] in MultiDroneAgentBase.__init__(): Wrong self.ObservationType!"
+            )
             exit()
         self.OBS_TYPE = obs
         self.ACT_TYPE = act
@@ -159,7 +163,9 @@ class MultiDroneAgentBase(DroneBase):
         # share obs ouputs.
 
         #### Save, preprocess, and clip the action to the max value #
-        self.clipped_action = np.reshape(self._preprocessAction(action), (self.NUM_DRONES, 4))
+        self.clipped_action = np.reshape(
+            self._preprocessAction(action), (self.NUM_DRONES, 4)
+        )
         #### Repeat for as many as the physics steps #####
         valid_mask = ~(self.crashed | self.finished)
         valid_indices = np.where(valid_mask)[0]
@@ -231,7 +237,9 @@ class MultiDroneAgentBase(DroneBase):
         # Positions
         xy_indices = np.arange(self.NUM_DRONES)
         xy_coords = xy_indices * 4 * self.L
-        self.INIT_XYZS = np.column_stack([xy_coords, xy_coords, np.ones(self.NUM_DRONES)])
+        self.INIT_XYZS = np.column_stack(
+            [xy_coords, xy_coords, np.ones(self.NUM_DRONES)]
+        )
         self.TARGET = self.INIT_XYZS.copy()
         self.next_TARGET = self.INIT_XYZS.copy()
         # Attitudes
@@ -326,9 +334,13 @@ class MultiDroneAgentBase(DroneBase):
                 rate_z = self.MAX_RATE_Z * action[:, 3].reshape(-1, 1)
                 preprocess_action = np.hstack([thrust.reshape(-1, 1), rate_xy, rate_z])
             else:
-                print("[ERROR] in MultiDroneAgentBase._preprocessAction(): Wrong self.DIM!")
+                print(
+                    "[ERROR] in MultiDroneAgentBase._preprocessAction(): Wrong self.DIM!"
+                )
         else:
-            print("[ERROR] in MultiDroneAgentBase._preprocessAction(): Wrong self.ACT_TYPE!")
+            print(
+                "[ERROR] in MultiDroneAgentBase._preprocessAction(): Wrong self.ACT_TYPE!"
+            )
         return preprocess_action
 
     ################################################################################
@@ -362,9 +374,13 @@ class MultiDroneAgentBase(DroneBase):
                     )
                     ############################################################
                 else:
-                    print("[ERROR] in MultiDroneAgentBase._observationSpace(): Wrong self.DIM!")
+                    print(
+                        "[ERROR] in MultiDroneAgentBase._observationSpace(): Wrong self.DIM!"
+                    )
             else:
-                print("[ERROR] in MultiDroneAgentBase._observationSpace(): Wrong self.ACT_TYPE!")
+                print(
+                    "[ERROR] in MultiDroneAgentBase._observationSpace(): Wrong self.ACT_TYPE!"
+                )
         elif self.OBS_TYPE == ObservationType.RACE_MULTI:
             if self.ACT_TYPE == ActionType.RATE:
                 if self.DIM == SimulationDim.DIM_3:
@@ -390,11 +406,17 @@ class MultiDroneAgentBase(DroneBase):
                     )
                     ############################################################
                 else:
-                    print("[ERROR] in MultiDroneAgentBase._observationSpace(): Wrong self.DIM!")
+                    print(
+                        "[ERROR] in MultiDroneAgentBase._observationSpace(): Wrong self.DIM!"
+                    )
             else:
-                print("[ERROR] in MultiDroneAgentBase._observationSpace(): Wrong self.ACT_TYPE!")
+                print(
+                    "[ERROR] in MultiDroneAgentBase._observationSpace(): Wrong self.ACT_TYPE!"
+                )
         else:
-            print("[ERROR] in MultiDroneAgentBase._observationSpace(): Wrong self.OBS_TYPE!")
+            print(
+                "[ERROR] in MultiDroneAgentBase._observationSpace(): Wrong self.OBS_TYPE!"
+            )
 
         obs_space = agent_obs_space
         return obs_space
@@ -428,9 +450,13 @@ class MultiDroneAgentBase(DroneBase):
                     )
                     ############################################################
                 else:
-                    print("[ERROR] in MultiDroneAgentBase._observationSpace(): Wrong self.DIM!")
+                    print(
+                        "[ERROR] in MultiDroneAgentBase._observationSpace(): Wrong self.DIM!"
+                    )
             else:
-                print("[ERROR] in MultiDroneAgentBase._observationSpace(): Wrong self.ACT_TYPE!")
+                print(
+                    "[ERROR] in MultiDroneAgentBase._observationSpace(): Wrong self.ACT_TYPE!"
+                )
         elif self.OBS_TYPE == ObservationType.RACE_MULTI:
             if self.ACT_TYPE == ActionType.RATE:
                 if self.DIM == SimulationDim.DIM_3:
@@ -449,11 +475,17 @@ class MultiDroneAgentBase(DroneBase):
                     )
                     ############################################################
                 else:
-                    print("[ERROR] in MultiDroneAgentBase._observationSpace(): Wrong self.DIM!")
+                    print(
+                        "[ERROR] in MultiDroneAgentBase._observationSpace(): Wrong self.DIM!"
+                    )
             else:
-                print("[ERROR] in MultiDroneAgentBase._observationSpace(): Wrong self.ACT_TYPE!")
+                print(
+                    "[ERROR] in MultiDroneAgentBase._observationSpace(): Wrong self.ACT_TYPE!"
+                )
         else:
-            print("[ERROR] in MultiDroneAgentBase._observationSpace(): Wrong self.OBS_TYPE!")
+            print(
+                "[ERROR] in MultiDroneAgentBase._observationSpace(): Wrong self.OBS_TYPE!"
+            )
         return share_obs_space
 
     ################################################################################
@@ -475,34 +507,48 @@ class MultiDroneAgentBase(DroneBase):
         if self.OBS_TYPE == ObservationType.RACE:
             if self.ACT_TYPE == ActionType.RATE:
                 if self.DIM == SimulationDim.DIM_3:
-                    obs = state[:, : self.self_obs_size].reshape(self.NUM_DRONES, self.self_obs_size)
+                    obs = state[:, : self.self_obs_size].reshape(
+                        self.NUM_DRONES, self.self_obs_size
+                    )
                     share_obs = obs
                 else:
-                    print("[ERROR] in MultiDroneAgentBase._computeObs(): Wrong self.DIM!")
+                    print(
+                        "[ERROR] in MultiDroneAgentBase._computeObs(): Wrong self.DIM!"
+                    )
             else:
-                print("[ERROR] in MultiDroneAgentBase._computeObs(): Wrong self.ACT_TYPE!")
+                print(
+                    "[ERROR] in MultiDroneAgentBase._computeObs(): Wrong self.ACT_TYPE!"
+                )
         elif self.OBS_TYPE == ObservationType.RACE_MULTI:
             if self.ACT_TYPE == ActionType.RATE:
                 if self.DIM == SimulationDim.DIM_3:
-                    obs = state[:, : self.obs_size].reshape(self.NUM_DRONES, self.obs_size)
+                    obs = state[:, : self.obs_size].reshape(
+                        self.NUM_DRONES, self.obs_size
+                    )
 
                     # Get the shared observation
                     state_by_agent = state.reshape(self.NUM_DRONES, self.state_size)
-                    share_obs = np.zeros((self.NUM_DRONES, self.share_obs_size), dtype=np.float32)
+                    share_obs = np.zeros(
+                        (self.NUM_DRONES, self.share_obs_size), dtype=np.float32
+                    )
 
                     for agent_id in range(self.NUM_DRONES):
                         all_agents_state = state_by_agent.copy()
                         # change the order of the last agent and the current agent
                         if agent_id != self.NUM_DRONES - 1:
-                            all_agents_state[[agent_id, self.NUM_DRONES - 1]] = all_agents_state[
-                                [self.NUM_DRONES - 1, agent_id]
-                            ]
+                            all_agents_state[[agent_id, self.NUM_DRONES - 1]] = (
+                                all_agents_state[[self.NUM_DRONES - 1, agent_id]]
+                            )
                         # flatten the state of all agents
                         share_obs[agent_id] = all_agents_state.flatten()
                 else:
-                    print("[ERROR] in MultiDroneAgentBase._computeObs(): Wrong self.DIM!")
+                    print(
+                        "[ERROR] in MultiDroneAgentBase._computeObs(): Wrong self.DIM!"
+                    )
             else:
-                print("[ERROR] in MultiDroneAgentBase._computeObs(): Wrong self.ACT_TYPE!")
+                print(
+                    "[ERROR] in MultiDroneAgentBase._computeObs(): Wrong self.ACT_TYPE!"
+                )
         else:
             print("[ERROR] in MultiDroneAgentBase._computeObs(): Wrong self.OBS_TYPE!")
 
@@ -562,7 +608,12 @@ class MultiDroneAgentBase(DroneBase):
         # unique pairs of drones
         if collision_pairs[0].size > 0:
             colliding_drones = np.unique(
-                np.concatenate([valid_indices[collision_pairs[0]], valid_indices[collision_pairs[1]]])
+                np.concatenate(
+                    [
+                        valid_indices[collision_pairs[0]],
+                        valid_indices[collision_pairs[1]],
+                    ]
+                )
             )
             collisions[colliding_drones] = True
 
@@ -580,12 +631,16 @@ class MultiDroneAgentBase(DroneBase):
             self.global_obs_size = 0
         elif self.OBS_TYPE == ObservationType.RACE_MULTI:
             self.self_obs_size = 22 + ray_obs_size
-            self.other_obs_size = 7 * (self.NUM_DRONES - 1)  # 7 states per drone (rel pos + rel vel + rel dist)
+            self.other_obs_size = 7 * (
+                self.NUM_DRONES - 1
+            )  # 7 states per drone (rel pos + rel vel + rel dist)
             self.global_obs_size = 3
         else:
             print("[ERROR] in MultiDroneAgentBase._getObsSize(): Wrong self.OBS_TYPE!")
         self.obs_size = self.self_obs_size + self.other_obs_size
-        self.state_size = self.self_obs_size + self.other_obs_size + self.global_obs_size
+        self.state_size = (
+            self.self_obs_size + self.other_obs_size + self.global_obs_size
+        )
         self.share_obs_size = self.state_size * self.NUM_DRONES
 
     ################################################################################

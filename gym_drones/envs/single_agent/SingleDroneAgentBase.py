@@ -122,7 +122,9 @@ class SingleDroneAgentBase(DroneBase):
         # in MultiDroneAgentBase.step()
 
         #### Save, preprocess, and clip the action to the max value #
-        self.clipped_action = np.reshape(self._preprocessAction(action), (self.NUM_DRONES, 4))
+        self.clipped_action = np.reshape(
+            self._preprocessAction(action), (self.NUM_DRONES, 4)
+        )
         #### Repeat for as many as the physics steps #####
         for _ in range(self.SIM_STEPS_PER_CTRL):
             self._dynamics_vectorized(self.clipped_action)
@@ -236,7 +238,9 @@ class SingleDroneAgentBase(DroneBase):
             else:
                 print("[ERROR] in SingleDroneAgentBase._actionSpace(): Wrong self.DIM!")
         else:
-            print("[ERROR] in SingleDroneAgentBase._actionSpace(): Wrong self.ACT_TYPE!")
+            print(
+                "[ERROR] in SingleDroneAgentBase._actionSpace(): Wrong self.ACT_TYPE!"
+            )
             exit()
         return spaces.Box(
             low=np.float32(-1 * np.ones(size)),
@@ -283,9 +287,13 @@ class SingleDroneAgentBase(DroneBase):
                 )
                 # return np.hstack([self.TWR_MAX*self.GRAVITY*(1 + action[0])/2, self.MAX_RATE_XY*action[1:3], 0])
             else:
-                print("[ERROR] in SingleDroneAgentBase._preprocessAction(): Wrong self.DIM!")
+                print(
+                    "[ERROR] in SingleDroneAgentBase._preprocessAction(): Wrong self.DIM!"
+                )
         else:
-            print("[ERROR] in SingleDroneAgentBase._preprocessAction(): Wrong self.ACT_TYPE!")
+            print(
+                "[ERROR] in SingleDroneAgentBase._preprocessAction(): Wrong self.ACT_TYPE!"
+            )
 
     ################################################################################
 
@@ -325,9 +333,13 @@ class SingleDroneAgentBase(DroneBase):
                     )
                     ############################################################
                 else:
-                    print("[ERROR] in SingleDroneAgentBase._observationSpace(): Wrong self.DIM!")
+                    print(
+                        "[ERROR] in SingleDroneAgentBase._observationSpace(): Wrong self.DIM!"
+                    )
             else:
-                print("[ERROR] in SingleDroneAgentBase._observationSpace(): Wrong self.ACT_TYPE!")
+                print(
+                    "[ERROR] in SingleDroneAgentBase._observationSpace(): Wrong self.ACT_TYPE!"
+                )
         elif self.OBS_TYPE == ObservationType.KIN_REL:
             if self.ACT_TYPE == ActionType.RATE:
                 if self.DIM == SimulationDim.DIM_2:
@@ -355,9 +367,13 @@ class SingleDroneAgentBase(DroneBase):
                     )
                     ############################################################
                 else:
-                    print("[ERROR] in SingleDroneAgentBase._observationSpace(): Wrong self.DIM!")
+                    print(
+                        "[ERROR] in SingleDroneAgentBase._observationSpace(): Wrong self.DIM!"
+                    )
             else:
-                print("[ERROR] in SingleDroneAgentBase._observationSpace(): Wrong self.ACT_TYPE!")
+                print(
+                    "[ERROR] in SingleDroneAgentBase._observationSpace(): Wrong self.ACT_TYPE!"
+                )
         elif self.OBS_TYPE == ObservationType.POS_REL:
             if self.ACT_TYPE == ActionType.RATE:
                 if self.DIM == SimulationDim.DIM_3:
@@ -374,9 +390,13 @@ class SingleDroneAgentBase(DroneBase):
                     )
                     ############################################################
                 else:
-                    print("[ERROR] in SingleDroneAgentBase._observationSpace(): Wrong self.DIM!")
+                    print(
+                        "[ERROR] in SingleDroneAgentBase._observationSpace(): Wrong self.DIM!"
+                    )
             else:
-                print("[ERROR] in SingleDroneAgentBase._observationSpace(): Wrong self.ACT_TYPE!")
+                print(
+                    "[ERROR] in SingleDroneAgentBase._observationSpace(): Wrong self.ACT_TYPE!"
+                )
         elif self.OBS_TYPE == ObservationType.ROT_REL:
             if self.ACT_TYPE == ActionType.RATE:
                 if self.DIM == SimulationDim.DIM_3:
@@ -395,9 +415,13 @@ class SingleDroneAgentBase(DroneBase):
                     )
                     ############################################################
                 else:
-                    print("[ERROR] in SingleDroneAgentBase._observationSpace(): Wrong self.DIM!")
+                    print(
+                        "[ERROR] in SingleDroneAgentBase._observationSpace(): Wrong self.DIM!"
+                    )
             else:
-                print("[ERROR] in SingleDroneAgentBase._observationSpace(): Wrong self.ACT_TYPE!")
+                print(
+                    "[ERROR] in SingleDroneAgentBase._observationSpace(): Wrong self.ACT_TYPE!"
+                )
         elif self.OBS_TYPE == ObservationType.RACE:
             if self.ACT_TYPE == ActionType.RATE:
                 if self.DIM == SimulationDim.DIM_3:
@@ -416,11 +440,17 @@ class SingleDroneAgentBase(DroneBase):
                     )
                     ############################################################
                 else:
-                    print("[ERROR] in SingleDroneAgentBase._observationSpace(): Wrong self.DIM!")
+                    print(
+                        "[ERROR] in SingleDroneAgentBase._observationSpace(): Wrong self.DIM!"
+                    )
             else:
-                print("[ERROR] in SingleDroneAgentBase._observationSpace(): Wrong self.ACT_TYPE!")
+                print(
+                    "[ERROR] in SingleDroneAgentBase._observationSpace(): Wrong self.ACT_TYPE!"
+                )
         else:
-            print("[ERROR] in SingleDroneAgentBase._observationSpace(): Wrong self.OBS_TYPE!")
+            print(
+                "[ERROR] in SingleDroneAgentBase._observationSpace(): Wrong self.OBS_TYPE!"
+            )
 
     ################################################################################
 
@@ -463,9 +493,13 @@ class SingleDroneAgentBase(DroneBase):
                     return ret.astype("float32")
                     ############################################################
                 else:
-                    print("[ERROR] in SingleDroneAgentBase._computeObs(): Wrong self.DIM!")
+                    print(
+                        "[ERROR] in SingleDroneAgentBase._computeObs(): Wrong self.DIM!"
+                    )
             else:
-                print("[ERROR] in SingleDroneAgentBase._computeObs(): Wrong self.ACT_TYPE!")
+                print(
+                    "[ERROR] in SingleDroneAgentBase._computeObs(): Wrong self.ACT_TYPE!"
+                )
         elif self.OBS_TYPE == ObservationType.KIN_REL:
             if self.ACT_TYPE == ActionType.RATE:
                 if self.DIM == SimulationDim.DIM_2:
@@ -481,30 +515,42 @@ class SingleDroneAgentBase(DroneBase):
                     ############################################################
                     #### OBS SPACE OF SIZE 10
                     #### vector ###  distance  direction  rpy        vel
-                    ret = np.hstack([obs[20], obs[21:24], obs[7:10], obs[10:13]]).reshape(
+                    ret = np.hstack(
+                        [obs[20], obs[21:24], obs[7:10], obs[10:13]]
+                    ).reshape(
                         10,
                     )
                     return ret.astype("float32")
                     ############################################################
                 else:
-                    print("[ERROR] in SingleDroneAgentBase._computeObs(): Wrong self.DIM!")
+                    print(
+                        "[ERROR] in SingleDroneAgentBase._computeObs(): Wrong self.DIM!"
+                    )
             else:
-                print("[ERROR] in SingleDroneAgentBase._computeObs(): Wrong self.ACT_TYPE!")
+                print(
+                    "[ERROR] in SingleDroneAgentBase._computeObs(): Wrong self.ACT_TYPE!"
+                )
         elif self.OBS_TYPE == ObservationType.POS_REL:
             if self.ACT_TYPE == ActionType.RATE:
                 if self.DIM == SimulationDim.DIM_3:
                     ############################################################
                     #### OBS SPACE OF SIZE 13
                     #### vector ###  rel_pos     rpy        vel         last_action
-                    ret = np.hstack([obs[24:27], obs[7:10], obs[10:13], obs_uncliped[25:29]]).reshape(
+                    ret = np.hstack(
+                        [obs[24:27], obs[7:10], obs[10:13], obs_uncliped[25:29]]
+                    ).reshape(
                         13,
                     )
                     return ret.astype("float32")
                     ############################################################
                 else:
-                    print("[ERROR] in SingleDroneAgentBase._computeObs(): Wrong self.DIM!")
+                    print(
+                        "[ERROR] in SingleDroneAgentBase._computeObs(): Wrong self.DIM!"
+                    )
             else:
-                print("[ERROR] in SingleDroneAgentBase._computeObs(): Wrong self.ACT_TYPE!")
+                print(
+                    "[ERROR] in SingleDroneAgentBase._computeObs(): Wrong self.ACT_TYPE!"
+                )
         elif self.OBS_TYPE == ObservationType.ROT_REL:
             if self.ACT_TYPE == ActionType.RATE:
                 if self.DIM == SimulationDim.DIM_3:
@@ -526,9 +572,13 @@ class SingleDroneAgentBase(DroneBase):
                     return ret.astype("float32")
                     ############################################################
                 else:
-                    print("[ERROR] in SingleDroneAgentBase._computeObs(): Wrong self.DIM!")
+                    print(
+                        "[ERROR] in SingleDroneAgentBase._computeObs(): Wrong self.DIM!"
+                    )
             else:
-                print("[ERROR] in SingleDroneAgentBase._computeObs(): Wrong self.ACT_TYPE!")
+                print(
+                    "[ERROR] in SingleDroneAgentBase._computeObs(): Wrong self.ACT_TYPE!"
+                )
         elif self.OBS_TYPE == ObservationType.RACE:
             if self.ACT_TYPE == ActionType.RATE:
                 if self.DIM == SimulationDim.DIM_3:
@@ -551,9 +601,13 @@ class SingleDroneAgentBase(DroneBase):
                     return ret.astype("float32")
                     ############################################################
                 else:
-                    print("[ERROR] in SingleDroneAgentBase._computeObs(): Wrong self.DIM!")
+                    print(
+                        "[ERROR] in SingleDroneAgentBase._computeObs(): Wrong self.DIM!"
+                    )
             else:
-                print("[ERROR] in SingleDroneAgentBase._computeObs(): Wrong self.ACT_TYPE!")
+                print(
+                    "[ERROR] in SingleDroneAgentBase._computeObs(): Wrong self.ACT_TYPE!"
+                )
         else:
             print("[ERROR] in SingleDroneAgentBase._computeObs(): Wrong self.OBS_TYPE!")
 

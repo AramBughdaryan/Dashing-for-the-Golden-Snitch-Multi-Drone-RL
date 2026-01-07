@@ -1,6 +1,9 @@
-import pytest
 import os
-from gym_drones.utils.utils import recursive_dict_update, fix_none_values, get_latest_run_id
+from gym_drones.utils.utils import (
+    recursive_dict_update,
+    fix_none_values,
+    get_latest_run_id,
+)
 
 
 def test_recursive_dict_update():

@@ -36,7 +36,9 @@ def export_model(model_path: str, save_path: str, device: th.device):
     print(model.policy)
 
     # Create the TorchScript policy
-    onnxable_model = TorchScriptPolicy(model.policy.mlp_extractor.policy_net, model.policy.action_net)
+    onnxable_model = TorchScriptPolicy(
+        model.policy.mlp_extractor.policy_net, model.policy.action_net
+    )
 
     observation_size = model.observation_space.shape
     dummy_input = th.randn(1, *observation_size).to(device)
@@ -75,22 +77,37 @@ def main():
         "rot_rel": "rot_rel",
     }
 
-    parser = argparse.ArgumentParser(description="Export a Stable-Baselines3 PPO model to a TorchScript file.")
-    parser.add_argument(
-        "--model_dir", "-m", type=str, default="Learning_log", help="Directory containing the trained PPO model."
+    parser = argparse.ArgumentParser(
+        description="Export a Stable-Baselines3 PPO model to a TorchScript file."
     )
     parser.add_argument(
-        "--model_path", "-p", type=str, required=True, help="Path to the trained PPO model (.zip file)."
+        "--model_dir",
+        "-m",
+        type=str,
+        default="Learning_log",
+        help="Directory containing the trained PPO model.",
+    )
+    parser.add_argument(
+        "--model_path",
+        "-p",
+        type=str,
+        required=True,
+        help="Path to the trained PPO model (.zip file).",
     )
     parser.add_argument(
         "--model_name",
         "-n",
         type=str,
         default=None,
-        help="Name of the model file to export. If not provided, " "it will be derived from the model_path.",
+        help="Name of the model file to export. If not provided, "
+        "it will be derived from the model_path.",
     )
     parser.add_argument(
-        "--env", "-e", type=str, required=True, help="Environment name for which the model was trained."
+        "--env",
+        "-e",
+        type=str,
+        required=True,
+        help="Environment name for which the model was trained.",
     )
     parser.add_argument(
         "--save_path",
@@ -111,13 +128,18 @@ def main():
 
     # Validate environment
     if args.env not in envkey:
-        raise ValueError(f"Invalid environment '{args.env}'. " f"Valid options are: {list(envkey.keys())}")
+        raise ValueError(
+            f"Invalid environment '{args.env}'. "
+            f"Valid options are: {list(envkey.keys())}"
+        )
 
     # If save_path is not provided, create a default one
     if args.model_name is None:
         args.model_name = os.path.splitext(os.path.basename(args.model_path))[0]
 
-    model_path = os.path.join(args.model_dir, args.env, args.model_path, args.model_name)
+    model_path = os.path.join(
+        args.model_dir, args.env, args.model_path, args.model_name
+    )
     save_path = os.path.join(args.save_path, args.env, f"{args.model_name}.pt")
 
     device = th.device(args.device)

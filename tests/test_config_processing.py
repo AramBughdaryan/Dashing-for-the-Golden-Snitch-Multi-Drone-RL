@@ -1,3 +1,5 @@
+import pytest
+import yaml
 from matplotlib.colors import ListedColormap, Colormap
 from gym_drones.utils.rl_manager.config import _recursive_process_cmap
 

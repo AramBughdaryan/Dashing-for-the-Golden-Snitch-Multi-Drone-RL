@@ -1,9 +1,6 @@
 import pytest
 import numpy as np
-from gym_drones.utils.rl_manager.EvalCallback import (
-    EvalRewardCallback,
-    EvalTimeCallback,
-)
+from gym_drones.utils.rl_manager.EvalCallback import EvalRewardCallback, EvalTimeCallback
 
 
 @pytest.fixture
@@ -30,12 +27,7 @@ def test_eval_reward_callback(mock_env):
     for i in range(10):
         # simulate drone passing through waypoints
         callback.locals = {
-            "infos": {
-                "prog_reward": 1.0,
-                "command_reward": -0.1,
-                "crash_reward": 0.0,
-                "drone_safe_reward": 0.0,
-            }
+            "infos": {"prog_reward": 1.0, "command_reward": -0.1, "crash_reward": 0.0, "drone_safe_reward": 0.0}
         }
         callback.on_step()
     callback.on_episode_end()

@@ -21,9 +21,7 @@ def test_logger_log_and_finalize(sample_logger):
     assert sample_logger.counters[0] == 5
     assert sample_logger.end_step[0] == 5
     np.testing.assert_allclose(sample_logger.states[0, 0, 4], 4)  # x pos at last step
-    np.testing.assert_allclose(
-        sample_logger.states[0, 19, 4], 23
-    )  # thrust at last step
+    np.testing.assert_allclose(sample_logger.states[0, 19, 4], 23)  # thrust at last step
 
 
 def test_logger_to_traj_data(sample_logger):
@@ -33,19 +31,7 @@ def test_logger_to_traj_data(sample_logger):
     assert len(data_list) == 1
     traj_data = data_list[0]
 
-    assert traj_data.dtype.names == (
-        "t",
-        "p_x",
-        "p_y",
-        "p_z",
-        "q_x",
-        "q_y",
-        "q_z",
-        "q_w",
-        "v_x",
-        "v_y",
-        "v_z",
-    )
+    assert traj_data.dtype.names == ("t", "p_x", "p_y", "p_z", "q_x", "q_y", "q_z", "q_w", "v_x", "v_y", "v_z")
     assert len(traj_data) == 5  # 因为 end_step 是 5
     assert end_time == 0.5
     assert not crash_effect[0]
@@ -64,9 +50,7 @@ def test_data_to_racetrack():
     }
     noise_matrix = np.zeros((1, 1, 3))
     racetrack_list = _data_to_racetrack(
-        track_data,
-        shape_kwargs={"radius": 1.0, "margin": 0.0},
-        noise_matrix=noise_matrix,
+        track_data, shape_kwargs={"radius": 1.0, "margin": 0.0}, noise_matrix=noise_matrix
     )
 
     assert len(racetrack_list) == 1

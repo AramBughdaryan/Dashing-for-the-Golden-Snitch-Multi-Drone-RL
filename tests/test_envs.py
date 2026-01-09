@@ -1,5 +1,8 @@
 import pytest
 import numpy as np
+import yaml
+import os
+import gymnasium as gym
 
 from gym_drones.envs.single_agent.HoverEnv import HoverEnv
 from gym_drones.envs.multi_agent.RaceEnv import RaceEnv
@@ -40,9 +43,7 @@ def test_env_api_compliance(env_fixture, request):
     # test reset()
     obs, info = env.reset()
     assert isinstance(obs, np.ndarray), "Observation should be a numpy array"
-    assert (
-        obs[0].shape if obs.ndim > 1 else obs.shape
-    ) == env.observation_space.shape, "Observation shape mismatch"
+    assert (obs[0].shape if obs.ndim > 1 else obs.shape) == env.observation_space.shape, "Observation shape mismatch"
     assert isinstance(info, dict), "Info should be a dictionary"
 
     # test step(action)
@@ -57,29 +58,15 @@ def test_env_api_compliance(env_fixture, request):
     ) == env.observation_space.shape, "Step observation shape mismatch"
 
     if isinstance(env, (HoverEnv)):
-        assert isinstance(reward, float), (
-            "Reward should be a float for single-agent env"
-        )
-        assert isinstance(terminated, bool), (
-            "Terminated flag should be a bool for single-agent env"
-        )
-        assert truncated in [True, False], (
-            "Truncated flag should be a bool for single-agent env"
-        )
+        assert isinstance(reward, float), "Reward should be a float for single-agent env"
+        assert isinstance(terminated, bool), "Terminated flag should be a bool for single-agent env"
+        assert truncated in [True, False], "Truncated flag should be a bool for single-agent env"
     else:  # Multi-agent
-        assert isinstance(reward, np.ndarray), (
-            "Reward should be a numpy array for multi-agent env"
-        )
-        assert reward.shape == (env.NUM_DRONES,), (
-            "Reward shape mismatch for multi-agent env"
-        )
+        assert isinstance(reward, np.ndarray), "Reward should be a numpy array for multi-agent env"
+        assert reward.shape == (env.NUM_DRONES,), "Reward shape mismatch for multi-agent env"
         # In RaceEnv, terminated is bool, truncated is array
-        assert isinstance(terminated, bool), (
-            "Terminated flag should be a bool for multi-agent env"
-        )
-        assert truncated in [True, False], (
-            "Truncated flag should be a numpy array for multi-agent env"
-        )
+        assert isinstance(terminated, bool), "Terminated flag should be a bool for multi-agent env"
+        assert truncated in [True, False], "Truncated flag should be a numpy array for multi-agent env"
 
     assert isinstance(info, dict), "Step info should be a dictionary"
     env.close()
@@ -123,9 +110,7 @@ def test_race_env_set_waypoints(race_env):
     obs, info = race_env._setWaypoints_reset(waypoints)
 
     assert isinstance(obs, np.ndarray)
-    assert (
-        obs[0].shape if obs.ndim > 1 else obs.shape
-    ) == race_env.observation_space.shape
+    assert (obs[0].shape if obs.ndim > 1 else obs.shape) == race_env.observation_space.shape
     assert isinstance(info, dict)
     assert "target" in info
 

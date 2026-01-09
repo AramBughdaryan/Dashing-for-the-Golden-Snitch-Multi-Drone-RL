@@ -2,9 +2,7 @@ import numpy as np
 from typing import Dict, Union, List, Tuple, Any, Callable
 
 
-def _prepare_inputs(
-    t: Union[float, np.ndarray], initial_pos: np.ndarray
-) -> Tuple[np.ndarray, np.ndarray]:
+def _prepare_inputs(t: Union[float, np.ndarray], initial_pos: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     """Helper to ensure t and initial_pos are correctly shaped for broadcasting."""
     t = np.asarray(t)
     initial_pos = np.asarray(initial_pos)
@@ -22,11 +20,7 @@ def _prepare_inputs(
     return t, initial_pos
 
 
-def sin(
-    t: Union[float, np.ndarray],
-    initial_pos: np.ndarray,
-    params: Dict[str, Union[np.ndarray, str]],
-) -> np.ndarray:
+def sin(t: Union[float, np.ndarray], initial_pos: np.ndarray, params: Dict[str, Union[np.ndarray, str]]) -> np.ndarray:
     """
     Fully vectorized function for sinusoidal motion on multiple drones and gates.
 
@@ -57,9 +51,7 @@ def sin(
 
 
 def circle(
-    t: Union[float, np.ndarray],
-    initial_pos: np.ndarray,
-    params: Dict[str, Union[np.ndarray, str, bool]],
+    t: Union[float, np.ndarray], initial_pos: np.ndarray, params: Dict[str, Union[np.ndarray, str, bool]]
 ) -> np.ndarray:
     """
     Fully vectorized function for circular motion on multiple drones and gates.
@@ -99,9 +91,7 @@ def circle(
 
 
 def linear(
-    t: Union[float, np.ndarray],
-    initial_pos: np.ndarray,
-    params: Dict[str, Union[np.ndarray, str]],
+    t: Union[float, np.ndarray], initial_pos: np.ndarray, params: Dict[str, Union[np.ndarray, str]]
 ) -> np.ndarray:
     """
     Fully vectorized function for linear motion on multiple drones and gates.
@@ -178,9 +168,7 @@ class GateMotionPlanner:
         self.motion_plan = self._compile_plan(moving_gate_config, motion_library)
 
     def _compile_plan(
-        self,
-        config: List[Dict[str, Any]],
-        library: Dict[str, Callable] = MOTION_FUNCTIONS,
+        self, config: List[Dict[str, Any]], library: Dict[str, Callable] = MOTION_FUNCTIONS
     ) -> List[Dict[str, Any]]:
         """Parses the raw config into a structured, ready-to-use motion plan."""
         plan = []
@@ -193,9 +181,7 @@ class GateMotionPlanner:
                     continue
 
                 if func_name not in library:
-                    print(
-                        f"Warning: Motion function '{func_name}' not found in library. Skipping."
-                    )
+                    print(f"Warning: Motion function '{func_name}' not found in library. Skipping.")
                     continue
 
                 # Expand lap-relative indices to global absolute indices
@@ -216,21 +202,16 @@ class GateMotionPlanner:
                     relative_index = spec["index"]
                     # Generate absolute indices for all laps
                     absolute_indices_for_this_spec = [
-                        (lap * self.num_waypoints_per_lap) + relative_index
-                        for lap in range(self.num_laps)
+                        (lap * self.num_waypoints_per_lap) + relative_index for lap in range(self.num_laps)
                     ]
                     all_gate_indices.extend(absolute_indices_for_this_spec)
 
                     # Duplicate the numeric parameters for each lap
                     for key in numeric_params:
-                        numeric_params[key].extend(
-                            [spec["params"][key]] * self.num_laps
-                        )
+                        numeric_params[key].extend([spec["params"][key]] * self.num_laps)
 
                 # Convert only numeric parameter lists to numpy arrays
-                final_params = {
-                    key: np.asarray(val) for key, val in numeric_params.items()
-                }
+                final_params = {key: np.asarray(val) for key, val in numeric_params.items()}
                 # Add the non-numeric config parameters back in
                 final_params.update(config_params)
 

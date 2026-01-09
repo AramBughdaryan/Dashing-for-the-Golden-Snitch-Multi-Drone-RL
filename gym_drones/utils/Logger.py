@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from cycler import cycler
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -47,17 +48,11 @@ class Logger(object):
         self.PREALLOCATED_ARRAYS = False if duration_sec == 0 else True
         self.counters = np.zeros(num_drones)
         self.timestamps = np.zeros((num_drones, duration_sec * self.LOGGING_FREQ_HZ))
-        self.crashed_step = np.zeros(
-            num_drones, dtype=int
-        )  # crashed step for each drone
-        self.finished_step = np.zeros(
-            num_drones, dtype=int
-        )  # finished step for each drone
+        self.crashed_step = np.zeros(num_drones, dtype=int)  # crashed step for each drone
+        self.finished_step = np.zeros(num_drones, dtype=int)  # finished step for each drone
         self.end_step = np.zeros(num_drones, dtype=int)  # end step for each drone
         #### Note: this is the suggest information to log ##############################
-        self.states = np.zeros(
-            (num_drones, 20, duration_sec * self.LOGGING_FREQ_HZ)
-        )  #### 20 states: pos (3,), 0-2
+        self.states = np.zeros((num_drones, 20, duration_sec * self.LOGGING_FREQ_HZ))  #### 20 states: pos (3,), 0-2
         # vel (3,), 3-5
         # euler (3,), 6-8
         # rate (3,), 9-11
@@ -88,30 +83,16 @@ class Logger(object):
             (12,)-shaped array of floats containing the drone's control target.
 
         """
-        if (
-            drone < 0
-            or drone >= self.NUM_DRONES
-            or timestamp < 0
-            or len(state) != 20
-            or len(control) != 12
-        ):
+        if drone < 0 or drone >= self.NUM_DRONES or timestamp < 0 or len(state) != 20 or len(control) != 12:
             print("[ERROR] in Logger.log(), invalid data")
         current_counter = int(self.counters[drone])
         #### Add rows to the matrices if a counter exceeds their size
         if current_counter >= self.timestamps.shape[1]:
-            self.timestamps = np.concatenate(
-                (self.timestamps, np.zeros((self.NUM_DRONES, 1))), axis=1
-            )
-            self.states = np.concatenate(
-                (self.states, np.zeros((self.NUM_DRONES, 20, 1))), axis=2
-            )
-            self.controls = np.concatenate(
-                (self.controls, np.zeros((self.NUM_DRONES, 12, 1))), axis=2
-            )
+            self.timestamps = np.concatenate((self.timestamps, np.zeros((self.NUM_DRONES, 1))), axis=1)
+            self.states = np.concatenate((self.states, np.zeros((self.NUM_DRONES, 20, 1))), axis=2)
+            self.controls = np.concatenate((self.controls, np.zeros((self.NUM_DRONES, 12, 1))), axis=2)
         #### Advance a counter is the matrices have overgrown it ###
-        elif (
-            not self.PREALLOCATED_ARRAYS and self.timestamps.shape[1] > current_counter
-        ):
+        elif not self.PREALLOCATED_ARRAYS and self.timestamps.shape[1] > current_counter:
             current_counter = self.timestamps.shape[1] - 1
         #### Log the information and increase the counter ##########
         self.timestamps[drone, current_counter] = timestamp
@@ -141,9 +122,7 @@ class Logger(object):
             if hasattr(self, key):
                 setattr(self, key, value)
             else:
-                print(
-                    f"[WARNING] in Logger.update_info(), attribute '{key}' not found."
-                )
+                print(f"[WARNING] in Logger.update_info(), attribute '{key}' not found.")
 
         # Post-process to determine the definitive end step for plotting
         self._finalize_steps()
@@ -196,11 +175,7 @@ class Logger(object):
             Added to the foldername.
 
         """
-        current_time = (
-            ("-" + datetime.now().strftime("%m.%d.%Y_%H.%M.%S"))
-            if save_timestamps
-            else ""
-        )
+        current_time = ("-" + datetime.now().strftime("%m.%d.%Y_%H.%M.%S")) if save_timestamps else ""
         csv_dir = os.path.join(
             self.OUTPUT_FOLDER,
             "save-flight-" + comment + current_time,
@@ -254,9 +229,7 @@ class Logger(object):
 
         fig, axs = plt.subplots(10, 2, figsize=(30, 27))
         fig.suptitle("Drone Simulation Logs", fontsize=16, fontweight="bold")
-        t = np.arange(
-            0, self.timestamps.shape[1] / self.LOGGING_FREQ_HZ, 1 / self.LOGGING_FREQ_HZ
-        )
+        t = np.arange(0, self.timestamps.shape[1] / self.LOGGING_FREQ_HZ, 1 / self.LOGGING_FREQ_HZ)
         if len(t) > self.states.shape[2]:
             t = t[: self.states.shape[2]]
 
@@ -304,9 +277,7 @@ class Logger(object):
 
                     end_step = self.end_step[drone_idx]
                     if end_step > 0:
-                        t_plot = np.arange(
-                            0, end_step / self.LOGGING_FREQ_HZ, 1 / self.LOGGING_FREQ_HZ
-                        )
+                        t_plot = np.arange(0, end_step / self.LOGGING_FREQ_HZ, 1 / self.LOGGING_FREQ_HZ)
                         if len(t_plot) > end_step:
                             t_plot = t_plot[:end_step]
                     else:
@@ -322,7 +293,7 @@ class Logger(object):
                                 self.states[drone_idx, target_idx, :end_step],
                                 color="k",
                                 linestyle=":",
-                                label="Target",
+                                label=f"Target",
                             )
 
                     # Plot main data
@@ -341,38 +312,22 @@ class Logger(object):
                         finish_step = self.finished_step[drone_idx]
                         if finish_step > 0 and finish_step <= len(t_plot):
                             finish_time = finish_step / self.LOGGING_FREQ_HZ
-                            finish_val = self.states[
-                                drone_idx, row_idx, finish_step - 1
-                            ]
-                            ax.plot(
-                                finish_time,
-                                finish_val,
-                                "g*",
-                                markersize=12,
-                                label=f"Drone {drone_idx} Finished",
-                            )
+                            finish_val = self.states[drone_idx, row_idx, finish_step - 1]
+                            ax.plot(finish_time, finish_val, "g*", markersize=12, label=f"Drone {drone_idx} Finished")
 
                         # Marker for crashing
                         crash_step = self.crashed_step[drone_idx]
                         if crash_step > 0 and crash_step <= len(t_plot):
                             crash_time = crash_step / self.LOGGING_FREQ_HZ
                             crash_val = self.states[drone_idx, row_idx, crash_step - 1]
-                            ax.plot(
-                                crash_time,
-                                crash_val,
-                                "rX",
-                                markersize=10,
-                                label=f"Drone {drone_idx} Crashed",
-                            )
+                            ax.plot(crash_time, crash_val, "rX", markersize=10, label=f"Drone {drone_idx} Crashed")
 
                 # Only show x-axis label on the bottom-most plot in each column
                 if row_idx == len(col_configs) - 1:
                     ax.set_xlabel("Time (s)", fontsize=10)
                     ax.tick_params(axis="x", labelsize=8)
                 else:
-                    ax.tick_params(
-                        axis="x", labelbottom=False
-                    )  # Hide x-tick labels for non-bottom plots
+                    ax.tick_params(axis="x", labelbottom=False)  # Hide x-tick labels for non-bottom plots
 
                 ax.set_ylabel(y_label, fontsize=10)
                 ax.tick_params(axis="y", labelsize=8)

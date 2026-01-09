@@ -9,9 +9,7 @@ from race_utils.RaceVisualizer.RacePlotter import RacePlotter, BasePlotterList
 from race_utils.RaceGenerator.GenerationTools import create_state, create_gate
 
 
-def _data_to_racetrack(
-    data: dict, shape_kwargs: dict, noise_matrix: np.ndarray
-) -> List[RaceTrack]:
+def _data_to_racetrack(data: dict, shape_kwargs: dict, noise_matrix: np.ndarray) -> List[RaceTrack]:
     """
     Convert the data to a racetrack list.
 
@@ -36,20 +34,12 @@ def _data_to_racetrack(
     same_track = data.get("same_track", True)
     repeat_lap = data.get("repeat_lap", 1)
     # track waypoints
-    start_points = np.array(data["start_points"], dtype=float).reshape(
-        (track_num_drones, -1, 3)
-    )
-    end_points = np.array(data["end_points"], dtype=float).reshape(
-        (track_num_drones, -1, 3)
-    )
+    start_points = np.array(data["start_points"], dtype=float).reshape((track_num_drones, -1, 3))
+    end_points = np.array(data["end_points"], dtype=float).reshape((track_num_drones, -1, 3))
     if same_track:
-        waypoints = np.tile(
-            np.array(data["waypoints"], dtype=float), (track_num_drones, 1, 1)
-        )
+        waypoints = np.tile(np.array(data["waypoints"], dtype=float), (track_num_drones, 1, 1))
     else:
-        waypoints = np.array(data["waypoints"], dtype=float).reshape(
-            (track_num_drones, -1, 3)
-        )
+        waypoints = np.array(data["waypoints"], dtype=float).reshape((track_num_drones, -1, 3))
 
     # check if the track is valid
     if ~same_track and repeat_lap > 1:
@@ -74,11 +64,7 @@ def _data_to_racetrack(
         end_state = create_state({"pos": end_points[nth_drone]})
 
         # Create the RaceTrack object
-        race_track = RaceTrack(
-            init_state=init_state,
-            end_state=end_state,
-            race_name=f"{comment}_drone{nth_drone + 1}",
-        )
+        race_track = RaceTrack(init_state=init_state, end_state=end_state, race_name=f"{comment}_drone{nth_drone + 1}")
 
         for j in range(main_seg_len):
             # Create the gate
@@ -87,7 +73,7 @@ def _data_to_racetrack(
                 position=main_segments[nth_drone, j],
                 stationary=True,
                 shape_kwargs=shape_kwargs,
-                name=f"{comment}_Gate_{j + 1}",
+                name=f"{comment}_Gate_{j+1}",
             )
             race_track.add_gate(gate, gate.name)
         racetrack_list.append(race_track)
@@ -237,13 +223,9 @@ def load_plotter_track(
         The loaded plotters.
 
     """
-    track_file = os.path.join(
-        current_dir, "gym_drones/assets/Tracks/RaceUtils", f"{track_file}.yaml"
-    )
+    track_file = os.path.join(current_dir, "gym_drones/assets/Tracks/RaceUtils", f"{track_file}.yaml")
     if isinstance(plotter, RacePlotter):
         plotter.load_track(track_file=track_file, index=index)
     else:
-        plotter.load_track(
-            track_file=track_file, index=index, plot_track_once=plot_track_once
-        )
+        plotter.load_track(track_file=track_file, index=index, plot_track_once=plot_track_once)
     return plotter

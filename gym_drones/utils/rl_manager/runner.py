@@ -56,9 +56,7 @@ def pre_runner(config_dict: dict, eval_mode: bool = False) -> th.device:
     config_dict["logging"]["model_save_interval"] = model_save_interval
 
     # set the device
-    device = th.device(
-        "cuda" if config_dict["pyrl"]["use_cuda"] and th.cuda.is_available() else "cpu"
-    )
+    device = th.device("cuda" if config_dict["pyrl"]["use_cuda"] and th.cuda.is_available() else "cpu")
     if device.type == "cpu" and config_dict["pyrl"]["use_cuda"]:
         print("Warning: CUDA is not available, using CPU instead.")
     if config_dict["rl_hyperparams"]["verbose"] > 0:
@@ -100,9 +98,7 @@ def build_env(
         "seed": config_dict["seed"],
     }
     if config_dict["logging"]["drone_model_path"] is not None:
-        env_params["env_kwargs"]["drone_model_path"] = config_dict["logging"][
-            "drone_model_path"
-        ]
+        env_params["env_kwargs"]["drone_model_path"] = config_dict["logging"]["drone_model_path"]
     env_params["env_kwargs"]["eval_mode"] = eval_mode
 
     # create the environment
@@ -126,9 +122,7 @@ def build_env(
             )
     elif config_dict["pyrl"]["runner"] == "episode":
         if config_dict.get("marl_hyperparams", None) is not None and not eval_mode:
-            raise ValueError(
-                "MARL is not supported in episode mode. Please set the runner to 'parallel'."
-            )
+            raise ValueError("MARL is not supported in episode mode. Please set the runner to 'parallel'.")
         env_params = {
             "id": env_params["env_id"],
             **env_params["env_kwargs"],
@@ -156,10 +150,7 @@ def build_env(
                 f"ray_length={config_dict['env']['env_kwargs'].get('ray_length', 'not set')}"
             )
         if eval_mode:
-            print(
-                "Evaluation sensor noise:",
-                config_dict["env"]["env_kwargs"]["sensor_sigma"],
-            )
+            print("Evaluation sensor noise:", config_dict["env"]["env_kwargs"]["sensor_sigma"])
         else:
             print("Parallel Environments:", config_dict["pyrl"]["n_envs"])
         if config_dict["pyrl"]["runner"] == "parallel":
@@ -182,20 +173,16 @@ def build_env(
         # save the config file
         if config_dict["pyrl"]["runner"] == "parallel":
             env.get_attr(attr_name="unwrapped", indices=0)[0].saveYAMLParameters(
-                save_path=config_save_path,
-                verbose=config_dict["rl_hyperparams"]["verbose"],
+                save_path=config_save_path, verbose=config_dict["rl_hyperparams"]["verbose"]
             )
         else:
             env.unwrapped.saveYAMLParameters(
-                save_path=config_save_path,
-                verbose=config_dict["rl_hyperparams"]["verbose"],
+                save_path=config_save_path, verbose=config_dict["rl_hyperparams"]["verbose"]
             )
     return env
 
 
-def _find_checkpoint(
-    config_dict: dict, current_dir: Union[str, os.PathLike]
-) -> Union[str, os.PathLike]:
+def _find_checkpoint(config_dict: dict, current_dir: Union[str, os.PathLike]) -> Union[str, os.PathLike]:
     """Find the checkpoint file based on the configuration dictionary.
 
     Parameters
@@ -212,18 +199,11 @@ def _find_checkpoint(
 
     """
     ckpt_dir = os.path.join(current_dir, config_dict["logging"]["load_ckpt_path"])
-    ckpt_files = [
-        f
-        for f in os.listdir(ckpt_dir)
-        if f.startswith("rl_model_") and f.endswith("_steps.zip")
-    ]
+    ckpt_files = [f for f in os.listdir(ckpt_dir) if f.startswith("rl_model_") and f.endswith("_steps.zip")]
     if not ckpt_files:
         raise FileNotFoundError(f"No checkpoint files found in {ckpt_dir}")
     if config_dict["logging"]["load_step"] > 0:
-        ckpt_path = os.path.join(
-            ckpt_dir,
-            "rl_model_{}_steps.zip".format(config_dict["logging"]["load_step"]),
-        )
+        ckpt_path = os.path.join(ckpt_dir, "rl_model_{}_steps.zip".format(config_dict["logging"]["load_step"]))
     else:
         max_step_file = max(ckpt_files, key=lambda f: int(f.split("_")[2]))
         ckpt_path = os.path.join(ckpt_dir, max_step_file)
@@ -259,9 +239,7 @@ def load_model(
 
     """
     if env is None and not eval_mode:
-        raise ValueError(
-            "Environment is not provided. Please provide the environment for training."
-        )
+        raise ValueError("Environment is not provided. Please provide the environment for training.")
     # get the group name
     group_name = config_dict["pyrl"]["exp_name"]
     # set the policy architecture
@@ -282,9 +260,7 @@ def load_model(
 
     # load pt file, only supports eval mode and load_model_path
     if config_dict["logging"]["load_model_path"] is not None:
-        file_ext = os.path.splitext(config_dict["logging"]["load_model_path"])[
-            1
-        ].lower()
+        file_ext = os.path.splitext(config_dict["logging"]["load_model_path"])[1].lower()
         if file_ext == ".pt":
             if not eval_mode:
                 raise ValueError("Please provide the zip file for training.")
@@ -301,9 +277,7 @@ def load_model(
             # load the model from the path
             if config_dict["rl_hyperparams"]["verbose"] > 0:
                 print("Loading model from:", config_dict["logging"]["load_model_path"])
-            model = th.jit.load(
-                config_dict["logging"]["load_model_path"], map_location=device
-            )
+            model = th.jit.load(config_dict["logging"]["load_model_path"], map_location=device)
 
             return model
 
@@ -325,9 +299,7 @@ def load_model(
         # load the model from the path
         if config_dict["rl_hyperparams"]["verbose"] > 0:
             print("Loading model from:", config_dict["logging"]["load_model_path"])
-        model = PPO.load(
-            path=config_dict["logging"]["load_model_path"], env=env, device=device
-        )
+        model = PPO.load(path=config_dict["logging"]["load_model_path"], env=env, device=device)
     elif config_dict["logging"]["load_ckpt_path"] is not None:
         # load the model from the checkpoint path
         ckpt_path = _find_checkpoint(config_dict, current_dir)
@@ -338,11 +310,7 @@ def load_model(
         # create a new model
         policy_params = {
             **config_dict["rl_hyperparams"],
-            **(
-                config_dict["marl_hyperparams"]
-                if "marl_hyperparams" in config_dict
-                else {}
-            ),
+            **(config_dict["marl_hyperparams"] if "marl_hyperparams" in config_dict else {}),
             "env": env,
             "tensorboard_log": tensorboard_log,
             "seed": config_dict["seed"],
@@ -370,9 +338,7 @@ def load_model(
     return model
 
 
-def train_model(
-    model: PPO, config_dict: dict, current_dir: Union[str, os.PathLike]
-) -> None:
+def train_model(model: PPO, config_dict: dict, current_dir: Union[str, os.PathLike]) -> None:
     """Train the model based on the configuration dictionary.
 
     Parameters
@@ -401,9 +367,7 @@ def train_model(
             f"{model_name}_{model_id + 1}",
             "ckpts",
         )
-        checkpoint_callback = CheckpointCallback(
-            save_freq=save_freq, save_path=checkpoint_save_path
-        )
+        checkpoint_callback = CheckpointCallback(save_freq=save_freq, save_path=checkpoint_save_path)
         callback_list.append(checkpoint_callback)
     # start the training
     model.learn(

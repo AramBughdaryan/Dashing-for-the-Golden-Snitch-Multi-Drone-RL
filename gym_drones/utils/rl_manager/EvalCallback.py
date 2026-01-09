@@ -1,5 +1,4 @@
-import json
-import os
+import json, os
 import numpy as np
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, TYPE_CHECKING, Optional, Callable, Union
@@ -103,9 +102,7 @@ class EvalBaseCallback(ABC):
         """
         pass
 
-    def save_results(
-        self, save_dir: Union[str, os.PathLike], comment: str = ""
-    ) -> None:
+    def save_results(self, save_dir: Union[str, os.PathLike], comment: str = "") -> None:
         """
         Save the results to a file.
 
@@ -135,11 +132,7 @@ class ConvertCallback(EvalBaseCallback):
 
     """
 
-    def __init__(
-        self,
-        callback: Optional[Callable[[Dict[str, Any], Dict[str, Any]], bool]],
-        verbose: int = 0,
-    ):
+    def __init__(self, callback: Optional[Callable[[Dict[str, Any], Dict[str, Any]], bool]], verbose: int = 0):
         super().__init__(verbose)
         self.callback = callback
 
@@ -197,9 +190,7 @@ class EvalCallbackList(EvalBaseCallback):
         for callback in self.callbacks:
             callback.update_locals(locals_)
 
-    def save_results(
-        self, save_dir: Union[str, os.PathLike], comment: str = ""
-    ) -> None:
+    def save_results(self, save_dir: Union[str, os.PathLike], comment: str = "") -> None:
         """
         Save the results to a file.
 
@@ -274,7 +265,7 @@ class EvalRewardCallback(EvalBaseCallback):
         if self.verbose > 0:
             print(f"    Total reward:       {total_reward:8.4f}")
         if self.verbose > 1:
-            print("    Reward components:")
+            print(f"    Reward components:")
             print(f"        - progress:     {self.episode_prog_rewards:8.4f}")
             print(f"        - command:      {self.episode_command_rewards:8.4f}")
             print(f"        - crash:        {self.episode_crash_rewards:8.4f}")
@@ -285,24 +276,17 @@ class EvalRewardCallback(EvalBaseCallback):
         self.ep_prog_rew_mean = np.array(self.episode_prog_done_rewards).mean()
         self.ep_command_rew_mean = np.array(self.episode_command_done_rewards).mean()
         self.ep_crash_rew_mean = np.array(self.episode_crash_done_rewards).mean()
-        self.ep_drone_safe_rew_mean = np.array(
-            self.episode_drone_safe_done_rewards
-        ).mean()
+        self.ep_drone_safe_rew_mean = np.array(self.episode_drone_safe_done_rewards).mean()
 
         # Calculate standard deviations
         self.ep_prog_rew_std = np.array(self.episode_prog_done_rewards).std()
         self.ep_command_rew_std = np.array(self.episode_command_done_rewards).std()
         self.ep_crash_rew_std = np.array(self.episode_crash_done_rewards).std()
-        self.ep_drone_safe_rew_std = np.array(
-            self.episode_drone_safe_done_rewards
-        ).std()
+        self.ep_drone_safe_rew_std = np.array(self.episode_drone_safe_done_rewards).std()
 
         # Calculate total reward mean and std
         self.total_reward_mean = (
-            self.ep_prog_rew_mean
-            + self.ep_command_rew_mean
-            + self.ep_crash_rew_mean
-            + self.ep_drone_safe_rew_mean
+            self.ep_prog_rew_mean + self.ep_command_rew_mean + self.ep_crash_rew_mean + self.ep_drone_safe_rew_mean
         )
         self.total_reward_std = np.sqrt(
             self.ep_prog_rew_std**2
@@ -312,27 +296,15 @@ class EvalRewardCallback(EvalBaseCallback):
         )
 
         if self.verbose > 0:
-            print("[Reward Info]")
-            print(
-                f"Total reward:       {self.total_reward_mean:8.4f} ± {self.total_reward_std:.4f}"
-            )
+            print(f"[Reward Info]")
+            print(f"Total reward:       {self.total_reward_mean:8.4f} ± {self.total_reward_std:.4f}")
             print("Reward components:")
-            print(
-                f"    - progress:     {self.ep_prog_rew_mean:8.4f} ± {self.ep_prog_rew_std:.4f}"
-            )
-            print(
-                f"    - command:      {self.ep_command_rew_mean:8.4f} ± {self.ep_command_rew_std:.4f}"
-            )
-            print(
-                f"    - crash:        {self.ep_crash_rew_mean:8.4f} ± {self.ep_crash_rew_std:.4f}"
-            )
-            print(
-                f"    - drone safety: {self.ep_drone_safe_rew_mean:8.4f} ± {self.ep_drone_safe_rew_std:.4f}"
-            )
+            print(f"    - progress:     {self.ep_prog_rew_mean:8.4f} ± {self.ep_prog_rew_std:.4f}")
+            print(f"    - command:      {self.ep_command_rew_mean:8.4f} ± {self.ep_command_rew_std:.4f}")
+            print(f"    - crash:        {self.ep_crash_rew_mean:8.4f} ± {self.ep_crash_rew_std:.4f}")
+            print(f"    - drone safety: {self.ep_drone_safe_rew_mean:8.4f} ± {self.ep_drone_safe_rew_std:.4f}")
 
-    def save_results(
-        self, save_dir: Union[str, os.PathLike], comment: str = ""
-    ) -> None:
+    def save_results(self, save_dir: Union[str, os.PathLike], comment: str = "") -> None:
         """Save the results to a file.
 
         Parameters
@@ -407,17 +379,11 @@ class EvalTimeCallback(EvalBaseCallback):
         same_track = self.data.get("same_track", True)
         repeat_lap = self.data.get("repeat_lap", 1)
         # track waypoints
-        start_points = np.array(self.data["start_points"]).reshape(
-            (self.num_drones, -1, 3)
-        )
+        start_points = np.array(self.data["start_points"]).reshape((self.num_drones, -1, 3))
         if same_track:
-            waypoints = np.tile(
-                np.array(self.data["waypoints"]), (self.num_drones, 1, 1)
-            )
+            waypoints = np.tile(np.array(self.data["waypoints"]), (self.num_drones, 1, 1))
         else:
-            waypoints = np.array(self.data["waypoints"]).reshape(
-                (self.num_drones, -1, 3)
-            )
+            waypoints = np.array(self.data["waypoints"]).reshape((self.num_drones, -1, 3))
 
         start_len = start_points.shape[1]
         main_seg_len = waypoints.shape[1]
@@ -433,9 +399,7 @@ class EvalTimeCallback(EvalBaseCallback):
         print("    Lap infos:")
         print(f"        - Crash Rate: {self.crashed.mean() * 100:.2f}%")
         print(f"        - Finish Rate: {self.finished.mean() * 100:.2f}%")
-        print(
-            f"        - Lap points: Pt.{self.start_index + 1} - Pt.{self.end_index + 1}"
-        )
+        print(f"        - Lap points: Pt.{self.start_index + 1} - Pt.{self.end_index + 1}")
         print("        " + "-" * 41)
         print("        | Drone | Start(s) |  End(s)  | Time(s) | Status")
         print("        " + "-" * 41)
@@ -462,9 +426,7 @@ class EvalTimeCallback(EvalBaseCallback):
                 start_str = f"{start_time:.2f}"
                 end_str = f"{end_time:.2f}"
 
-            print(
-                f"        |  {(i + 1):2d}   |   {start_str:6s} |   {end_str:6s} |   {time_str:5s} | {status}"
-            )
+            print(f"        |  {(i + 1):2d}   |   {start_str:6s} |   {end_str:6s} |   {time_str:5s} | {status}")
         print("        " + "-" * 41)
 
     def _on_episode_start(self):
@@ -482,22 +444,14 @@ class EvalTimeCallback(EvalBaseCallback):
         self.crashed = np.array(self.env.crashed).copy().reshape((self.num_drones,))
         self.finished = np.array(self.env.finished).copy().reshape((self.num_drones,))
         # set the start time for each drone
-        start_indices = np.where(
-            (~self.start_flag) & (self.num_waypoints >= self.start_index)
-        )[0]
+        start_indices = np.where((~self.start_flag) & (self.num_waypoints >= self.start_index))[0]
         if len(start_indices) > 0:
-            self.start_time[start_indices] = (
-                self.locals["step_counter"] / self.env.CTRL_FREQ
-            )
+            self.start_time[start_indices] = self.locals["step_counter"] / self.env.CTRL_FREQ
             self.start_flag[start_indices] = True
         # set the end time for each drone
-        end_indices = np.where(
-            (~self.end_flag) & (self.num_waypoints >= self.end_index)
-        )[0]
+        end_indices = np.where((~self.end_flag) & (self.num_waypoints >= self.end_index))[0]
         if len(end_indices) > 0:
-            self.end_time[end_indices] = (
-                self.locals["step_counter"] / self.env.CTRL_FREQ
-            )
+            self.end_time[end_indices] = self.locals["step_counter"] / self.env.CTRL_FREQ
             self.end_flag[end_indices] = True
 
     def _on_episode_end(self):
@@ -529,14 +483,12 @@ class EvalTimeCallback(EvalBaseCallback):
         self.crashed_mean = np.array(self.crashed_list).mean()
         self.finished_mean = np.array(self.finished_list).mean()
         if self.verbose > 0:
-            print("[Time Info]")
+            print(f"[Time Info]")
             print(f"Lap time: {self.lap_time_mean:.2f} ± {self.lap_time_std:.2f} s")
             print(f"Crash Rate: {(self.crashed_mean * 100):.2f}%")
             print(f"Finish Rate: {(self.finished_mean * 100):.2f}%")
 
-    def save_results(
-        self, save_dir: Union[str, os.PathLike], comment: str = ""
-    ) -> None:
+    def save_results(self, save_dir: Union[str, os.PathLike], comment: str = "") -> None:
         """Save the results to a file.
 
         Parameters
